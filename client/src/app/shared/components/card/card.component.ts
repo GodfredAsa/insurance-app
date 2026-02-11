@@ -18,36 +18,49 @@ import { CardTheme } from '../../models/card.model';
         <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2"></div>
       }
       @if (theme() === 'default' && icon()) {
-        <div class="flex items-start gap-4">
-          <div
-            class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-            [class.bg-amber-100]="icon() === 'B'"
-            [class.bg-orange-100]="icon() === 'M'"
-            [class.bg-sky-100]="icon() === 'L'"
-            [class.bg-blue-100]="icon() !== 'B' && icon() !== 'M' && icon() !== 'L'"
-          >
-            @if (iconIsLetter()) {
-              <span
-                class="font-bold"
-                [class.text-amber-600]="icon() === 'B'"
-                [class.text-orange-600]="icon() === 'M'"
-                [class.text-sky-600]="icon() === 'L'"
-                [class.text-blue-600]="icon() !== 'B' && icon() !== 'M' && icon() !== 'L'"
-              >{{ icon() }}</span>
-            } @else {
-              <i class="fas {{ icon() }} text-blue-600"></i>
-            }
-          </div>
-          <div class="flex-1 min-w-0">
-            @if (value()) {
-              <p class="text-2xl font-bold text-gray-900">{{ value() }}</p>
-              @if (valueSubtext()) {
-                <p class="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
-                  <i class="fas fa-arrow-up text-green-500 text-xs"></i>
-                  {{ valueSubtext() }}
-                </p>
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-start gap-4 min-w-0 flex-1">
+            <div
+              class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+              [class.bg-amber-100]="icon() === 'B'"
+              [class.bg-orange-100]="icon() === 'M'"
+              [class.bg-sky-100]="icon() === 'L'"
+              [class.bg-green-100]="iconBg() === 'green'"
+              [class.bg-orange-100]="iconBg() === 'orange'"
+              [class.bg-blue-100]="iconBg() !== 'green' && iconBg() !== 'orange' && icon() !== 'B' && icon() !== 'M' && icon() !== 'L'"
+              [class.text-green-600]="iconBg() === 'green'"
+              [class.text-orange-600]="iconBg() === 'orange'"
+            >
+              @if (iconIsLetter()) {
+                <span
+                  class="font-bold"
+                  [class.text-amber-600]="icon() === 'B'"
+                  [class.text-orange-600]="icon() === 'M'"
+                  [class.text-sky-600]="icon() === 'L'"
+                  [class.text-blue-600]="icon() !== 'B' && icon() !== 'M' && icon() !== 'L'"
+                >{{ icon() }}</span>
+              } @else {
+                <i class="fas {{ icon() }} text-lg" [class.text-green-600]="iconBg() === 'green'" [class.text-orange-600]="iconBg() === 'orange'" [class.text-blue-600]="iconBg() !== 'green' && iconBg() !== 'orange'"></i>
               }
-            }
+            </div>
+            <div class="min-w-0 flex-1">
+              @if (title() && statCard()) {
+                <p class="text-sm font-medium text-gray-500">{{ title() }}</p>
+              }
+              @if (value()) {
+                <p class="text-2xl font-bold text-gray-900 mt-0.5">{{ value() }}</p>
+                @if (valueSubtext()) {
+                  <p class="text-sm flex items-center gap-1 mt-0.5" [class.text-red-600]="trendDown()" [class.text-green-600]="!trendDown()">
+                    @if (trendDown()) {
+                      <i class="fas fa-arrow-down text-xs"></i>
+                    } @else {
+                      <i class="fas fa-arrow-up text-xs"></i>
+                    }
+                    {{ valueSubtext() }}
+                  </p>
+                }
+              }
+            </div>
           </div>
         </div>
       }
@@ -83,6 +96,12 @@ export class CardComponent {
   theme = input<CardTheme>('default');
   cardSubtext = input<string>();
   cardHolder = input<string>();
+  /** For stat cards: green or orange icon background */
+  iconBg = input<'green' | 'orange' | null>(null);
+  /** Trend down (red) vs up (green) for valueSubtext */
+  trendDown = input<boolean>(false);
+  /** When true, show title above value (stat card layout) */
+  statCard = input<boolean>(false);
 
   iconIsLetter(): boolean {
     const i = this.icon();

@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { NavItemConfig } from '../../models/nav-item.model';
 import { NavItemComponent } from '../nav-item/nav-item.component';
 
@@ -18,46 +18,64 @@ export interface SidebarUser {
       [class.w-64]="!collapsed()"
       [class.w-20]="collapsed()"
     >
-      <div class="p-5 border-b border-gray-100 flex-shrink-0">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 overflow-hidden">
-            <span class="text-xl font-bold text-gray-900 whitespace-nowrap">Boltz</span>
-            @if (!collapsed()) {
-              <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="none"><path fill="#3B82F6" d="M13 2L3 14h8l-2 8 10-12h-8l2-8z"/></svg>
-            }
-          </div>
-          <button type="button" (click)="toggle.emit()" class="p-2 rounded-lg hover:bg-gray-100" aria-label="Toggle sidebar">
-            <i class="fas fa-bars text-gray-600"></i>
-          </button>
-        </div>
-      </div>
-      @if (user(); as u) {
-        <div class="p-5 flex items-center gap-3 border-b border-gray-100 flex-shrink-0">
-          <img
-            [src]="getAvatarUrl(u)"
-            alt="Avatar"
-            class="w-12 h-12 rounded-full object-cover flex-shrink-0"
-          />
-          @if (!collapsed()) {
-            <div class="flex-1 min-w-0">
-              <p class="font-semibold text-gray-900 truncate">Hello, {{ u.name.split(' ')[0] }}</p>
-              <p class="text-sm text-gray-500 truncate">{{ u.email }}</p>
-            </div>
+      <div class="p-4 border-b border-gray-100 flex-shrink-0" [class.px-3]="collapsed()">
+        <div class="flex items-center justify-between" [class.justify-center]="collapsed()">
+          @if (collapsed()) {
+            <button type="button" (click)="toggle.emit()" class="p-2 rounded-lg hover:bg-gray-100" aria-label="Expand sidebar">
+              <i class="fas fa-bars text-gray-600"></i>
+            </button>
+          } @else {
+            <span class="text-xl font-bold text-green-600 whitespace-nowrap truncate">SMILE FOOD</span>
+            <button type="button" (click)="toggle.emit()" class="p-2 rounded-lg hover:bg-gray-100 flex-shrink-0" aria-label="Collapse sidebar">
+              <i class="fas fa-bars text-gray-600"></i>
+            </button>
           }
         </div>
-      }
+      </div>
       <nav class="flex-1 overflow-y-auto py-4 px-3">
         <ul class="space-y-0.5">
           @for (navItem of navItems(); track navItem.label) {
-            <app-nav-item [item]="navItem" />
+            <app-nav-item [item]="navItem" [activeClass]="'green'" [collapsed]="collapsed()" />
           }
         </ul>
+        @if (!collapsed()) {
+          <p class="px-3 pt-4 pb-1 text-xs font-medium text-gray-400 uppercase tracking-wider">Support</p>
+          <ul class="space-y-0.5">
+            @for (supportItem of supportItems(); track supportItem.label) {
+              <app-nav-item [item]="supportItem" [activeClass]="'green'" [collapsed]="false" />
+            }
+            <li class="flex items-center justify-between py-2.5 px-3 rounded-lg text-gray-600">
+              <div class="flex items-center gap-3">
+                <i class="fas fa-moon w-5 text-center"></i>
+                <span>Dark mode</span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                [attr.aria-checked]="darkMode()"
+                (click)="darkMode.set(!darkMode())"
+                class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                [class.bg-gray-200]="!darkMode()"
+                [class.bg-green-600]="darkMode()"
+              >
+                <span
+                  class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition"
+                  [class.translate-x-1]="!darkMode()"
+                  [class.translate-x-6]="darkMode()"
+                ></span>
+              </button>
+            </li>
+          </ul>
+        }
       </nav>
-      @if (footerText() && !collapsed()) {
-        <div class="p-5 border-t border-gray-100 text-xs text-gray-400 space-y-1 flex-shrink-0">
-          <p class="font-medium text-gray-500">Boltz Crypto Admin Dashboard</p>
-          <p>© 2020 All Rights Reserved</p>
-          <p>Made with <span class="text-red-500">❤️</span> by Peterdraw</p>
+      @if (!collapsed()) {
+        <div class="p-4 flex-shrink-0">
+          <div class="rounded-xl bg-green-600 p-4 text-white">
+            <p class="text-sm leading-snug">Earns 50 \$ when you refer! Refer a friends and get a bonus now!</p>
+            <button type="button" class="mt-3 w-full rounded-lg bg-white/20 py-2 text-sm font-medium hover:bg-white/30">
+              Show more
+            </button>
+          </div>
         </div>
       }
     </aside>
@@ -66,13 +84,15 @@ export interface SidebarUser {
 })
 export class SidebarComponent {
   collapsed = input<boolean>(false);
+  user = input<SidebarUser | null>(null);
+  navItems = input<NavItemConfig[]>([]);
+  supportItems = input<NavItemConfig[]>([]);
+  footerText = input<string | null>(null);
+  toggle = output<void>();
+  darkMode = signal(false);
 
   getAvatarUrl(user: SidebarUser): string {
     if (user.avatarUrl) return user.avatarUrl;
-    return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=e0e7ff&color=4f46e5';
+    return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=dcfce7&color=16a34a';
   }
-  user = input<SidebarUser | null>(null);
-  navItems = input<NavItemConfig[]>([]);
-  footerText = input<string | null>(null);
-  toggle = output<void>();
 }
