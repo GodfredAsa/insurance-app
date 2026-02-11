@@ -8,12 +8,12 @@ import { NavItemConfig } from './shared/models/nav-item.model';
   standalone: true,
   imports: [RouterOutlet, SidebarComponent],
   template: `
-    <div class="flex min-h-screen bg-[#F4F6F9] text-gray-800">
+    <div class="flex min-h-screen bg-gray-100 text-gray-800">
       <app-sidebar
         [collapsed]="sidebarCollapsed()"
         [user]="sidebarUser()"
         [navItems]="navItems()"
-        [footerText]="'Boltz Crypto Admin Dashboard'"
+        [supportItems]="supportItems()"
         (toggle)="sidebarCollapsed.set(!sidebarCollapsed())"
       />
       <main
@@ -21,28 +21,28 @@ import { NavItemConfig } from './shared/models/nav-item.model';
         [class.ml-64]="!sidebarCollapsed()"
         [class.ml-20]="sidebarCollapsed()"
       >
-        <header class="sticky top-0 z-10 bg-[#F4F6F9] border-b border-gray-200 px-6 py-4">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="relative flex-1 max-w-md">
-              <input
-                type="search"
-                placeholder="Find something here..."
-                class="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
-              />
-              <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <header class="sticky top-0 z-10 bg-gray-100 border-b border-gray-200 px-6 py-4">
+          <div class="flex items-center gap-6">
+            <p class="text-lg font-medium text-gray-900 whitespace-nowrap">Hello, Mike!</p>
+            <div class="flex-1 flex justify-center max-w-xl mx-auto">
+              <div class="relative w-full">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input
+                  type="search"
+                  placeholder="Search anything here..."
+                  class="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400"
+                />
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <button type="button" class="relative p-2 rounded-lg hover:bg-white/80">
+            <div class="flex items-center gap-2">
+              <button type="button" class="relative p-2 rounded-full hover:bg-white">
                 <i class="fas fa-bell text-gray-600"></i>
-                <span class="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-medium">12</span>
               </button>
-              <button type="button" class="p-2 rounded-lg hover:bg-white/80">
-                <i class="fas fa-cog text-gray-600"></i>
-              </button>
-              <button type="button" class="flex items-center gap-2 rounded-xl bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700">
-                <i class="fas fa-sliders-h"></i>
-                Filter Periode
-              </button>
+              <img
+                [src]="getAvatarUrl()"
+                alt="Profile"
+                class="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
+              />
             </div>
           </div>
         </header>
@@ -55,24 +55,25 @@ import { NavItemConfig } from './shared/models/nav-item.model';
 export class AppComponent {
   sidebarCollapsed = signal(false);
   sidebarUser: () => SidebarUser | null = () => ({
-    name: 'William Francisson',
-    email: 'williamfrancisson@mail.com',
-    avatarUrl: 'https://ui-avatars.com/api/?name=William+Francisson&background=e0e7ff&color=4f46e5',
+    name: 'Mike',
+    email: 'mike@example.com',
+    avatarUrl: 'https://ui-avatars.com/api/?name=Mike&background=dcfce7&color=16a34a',
   });
   navItems = signal<NavItemConfig[]>([
-    { icon: 'fa-th-large', label: 'Dashboard', link: '/dashboard' },
-    {
-      icon: 'fa-credit-card',
-      label: 'My Wallet',
-      children: [
-        { icon: 'fa-plus', label: 'Add New', link: '/wallet/add' },
-        { icon: 'fa-list', label: 'Card List', link: '/wallet' },
-        { icon: 'fa-history', label: 'History', link: '/wallet/history' },
-      ],
-    },
-    { icon: 'fa-exchange-alt', label: 'Transaction', link: '/transaction' },
-    { icon: 'fa-coins', label: 'Crypto', link: '/crypto' },
-    { icon: 'fa-chart-line', label: 'Exchange', link: '/exchange' },
-    { icon: 'fa-cog', label: 'Settings', link: '/settings' },
+    { icon: 'fa-th-large', label: 'Overview', link: '/dashboard' },
+    { icon: 'fa-box-open', label: 'Orders', link: '/orders' },
+    { icon: 'fa-envelope', label: 'Messages', link: '/messages' },
+    { icon: 'fa-chart-bar', label: 'Statistics', link: '/statistics' },
+    { icon: 'fa-user', label: 'Profile', link: '/profile' },
   ]);
+  supportItems = signal<NavItemConfig[]>([
+    { icon: 'fa-cog', label: 'Settings', link: '/settings' },
+    { icon: 'fa-question-circle', label: 'Help', link: '/help' },
+  ]);
+
+  getAvatarUrl(): string {
+    const u = this.sidebarUser();
+    if (u?.avatarUrl) return u.avatarUrl;
+    return 'https://ui-avatars.com/api/?name=Mike&background=dcfce7&color=16a34a';
+  }
 }

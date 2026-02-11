@@ -1,132 +1,123 @@
 import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
+import { BarChartComponent } from '../../shared/components/bar-chart/bar-chart.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { DonutChartComponent } from '../../shared/components/donut-chart/donut-chart.component';
 import { LineChartComponent } from '../../shared/components/line-chart/line-chart.component';
-import { DonutChartItem, LineSeries } from '../../shared/models/chart.model';
+import { BarChartItem, DonutChartItem, LineSeries } from '../../shared/models/chart.model';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NgClass, CardComponent, DonutChartComponent, LineChartComponent],
+  imports: [NgClass, BarChartComponent, CardComponent, DonutChartComponent, LineChartComponent],
   template: `
     <div class="p-6 space-y-6">
-      <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+      <div class="flex flex-wrap items-center gap-3">
+        <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          <i class="fas fa-filter text-gray-500"></i>
+          Filters
+        </button>
+        <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          <i class="fas fa-calendar-alt text-gray-500"></i>
+          Last 30 days
+          <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+        </button>
+        <button type="button" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700">
+          <i class="fas fa-file-export"></i>
+          Export PDF
+        </button>
+      </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        @for (stat of statCards; track stat.value) {
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @for (stat of statCards; track stat.title) {
           <app-card
+            [title]="stat.title"
             [icon]="stat.icon"
             [value]="stat.value"
             [valueSubtext]="stat.valueSubtext"
+            [iconBg]="stat.iconBg"
+            [trendDown]="stat.trendDown"
+            [statCard]="true"
           />
         }
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <app-card title="Current Statistic" subtitle="Lorem ipsum">
-          <app-donut-chart [data]="donutData" [chartHeight]="200" />
-        </app-card>
-        <app-card title="Market Overview" subtitle="Lorem ipsum dolor sit amet, consectetur">
-          <div class="flex justify-end mb-2">
-            <button type="button" class="text-sm text-gray-600 flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 hover:bg-gray-50">
-              Weekly (2020)
-              <i class="fas fa-chevron-down text-xs"></i>
-            </button>
+        <app-card>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Statistics</h2>
+            <a href="#" class="text-sm font-medium text-green-600 hover:text-green-700">more &gt;</a>
           </div>
-          <app-line-chart [series]="lineSeries" [xLabels]="lineXLabels" height="240px" />
-        </app-card>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        @for (balance of balanceCards; track balance.theme) {
-          <app-card
-            [theme]="balance.theme"
-            [title]="balance.title"
-            [value]="balance.value"
-            cardSubtext="VALID THRU 08/21"
-            [cardHolder]="balance.cardHolder"
+          <app-donut-chart
+            [data]="donutData"
+            [chartHeight]="260"
+            centerTitle="Total orders"
+            centerValue="857"
           />
-        }
+        </app-card>
+        <app-card>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Orders history</h2>
+            <a href="#" class="text-sm font-medium text-green-600 hover:text-green-700">more &gt;</a>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-gray-500 border-b border-gray-200">
+                  <th class="pb-3 font-medium">Order number</th>
+                  <th class="pb-3 font-medium">Status</th>
+                  <th class="pb-3 font-medium">Date and Time</th>
+                  <th class="pb-3 font-medium">Amount</th>
+                  <th class="pb-3 font-medium w-10"></th>
+                </tr>
+              </thead>
+              <tbody class="text-gray-700">
+                @for (row of ordersHistory; track row.orderNumber) {
+                  <tr class="border-b border-gray-100 hover:bg-gray-50/50">
+                    <td class="py-3 font-medium">{{ row.orderNumber }}</td>
+                    <td class="py-3">
+                      <span class="inline-flex items-center gap-1.5" [ngClass]="row.statusClass">
+                        <i class="fas text-xs" [ngClass]="row.statusIcon"></i>
+                        {{ row.status }}
+                      </span>
+                    </td>
+                    <td class="py-3">{{ row.dateTime }}</td>
+                    <td class="py-3">{{ row.amount }}</td>
+                    <td class="py-3">
+                      <button type="button" class="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-ellipsis-v"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </app-card>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <app-card title="Recent Trading Activities" subtitle="Lorem ipsum dolor sit amet, consectetur">
-          <div class="flex gap-2 mb-4">
-            <button type="button" class="text-sm text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">Monthly</button>
-            <button type="button" class="text-sm text-gray-600 px-3 py-1.5 rounded-lg hover:bg-gray-100">Weekly</button>
-            <button type="button" class="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1.5 rounded-lg">Today</button>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <app-card>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Insurance contribution trend</h2>
+            <a href="#" class="text-sm font-medium text-green-600 hover:text-green-700">more &gt;</a>
           </div>
-          <ul class="space-y-4">
-            @for (act of recentActivities; track act.name) {
-              <li class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" [ngClass]="act.iconBg">
-                  <span class="font-bold text-sm" [ngClass]="act.iconColor">{{ act.iconLetter }}</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="font-medium text-gray-900">{{ act.name }}</p>
-                  <p class="text-xs text-gray-500">{{ act.time }}</p>
-                </div>
-                <span class="font-semibold" [ngClass]="act.amountClass">{{ act.amount }}</span>
-                <span class="rounded-full text-xs font-medium px-2.5 py-1" [ngClass]="act.badgeClass">{{ act.status }}</span>
-              </li>
-            }
-          </ul>
+          <app-line-chart
+            [series]="insuranceContributionTrend"
+            [xLabels]="contributionMonths"
+            height="280px"
+          />
         </app-card>
-        <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <app-card title="Sell Order">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-8 h-8 rounded-lg bg-sky-100 flex items-center justify-center">
-                <span class="text-sky-600 font-bold text-sm">L</span>
-              </div>
-              <span class="text-sm font-medium text-gray-700">Litecoin</span>
-            </div>
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="text-gray-500 border-b border-gray-100">
-                  <th class="text-left py-2 font-medium">Price</th>
-                  <th class="text-left py-2 font-medium">Amount</th>
-                  <th class="text-left py-2 font-medium">Total</th>
-                </tr>
-              </thead>
-              <tbody class="text-gray-700">
-                @for (row of sellOrders; track row.price) {
-                  <tr class="border-b border-gray-50">
-                    <td class="py-2">{{ row.price }}</td>
-                    <td class="py-2">{{ row.amount }}</td>
-                    <td class="py-2">{{ row.total }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </app-card>
-          <app-card title="Buy Order">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
-                <span class="text-orange-600 font-bold text-sm">M</span>
-              </div>
-              <span class="text-sm font-medium text-gray-700">Monero</span>
-            </div>
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="text-gray-500 border-b border-gray-100">
-                  <th class="text-left py-2 font-medium">Price</th>
-                  <th class="text-left py-2 font-medium">Amount</th>
-                  <th class="text-left py-2 font-medium">Total</th>
-                </tr>
-              </thead>
-              <tbody class="text-gray-700">
-                @for (row of buyOrders; track row.price) {
-                  <tr class="border-b border-gray-50">
-                    <td class="py-2">{{ row.price }}</td>
-                    <td class="py-2">{{ row.amount }}</td>
-                    <td class="py-2">{{ row.total }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </app-card>
-        </div>
+        <app-card>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Monthly contribution</h2>
+            <a href="#" class="text-sm font-medium text-green-600 hover:text-green-700">more &gt;</a>
+          </div>
+          <app-bar-chart
+            [data]="monthlyContributionBars"
+            height="280px"
+          />
+        </app-card>
       </div>
     </div>
   `,
@@ -134,46 +125,66 @@ import { DonutChartItem, LineSeries } from '../../shared/models/chart.model';
 })
 export class DashboardComponent {
   statCards = [
-    { icon: 'B', value: '$984', valueSubtext: '45% This week' },
-    { icon: 'M', value: '$22,567', valueSubtext: '45% This week' },
-    { icon: 'fa-arrow-up', value: '$168,331.09', valueSubtext: '45% This week' },
-    { icon: 'L', value: '$7,784', valueSubtext: '45% This week' },
+    {
+      title: 'Monthly Delivery',
+      value: '857 orders',
+      valueSubtext: '-10% vs past month',
+      icon: 'fa-truck',
+      iconBg: 'green' as const,
+      trendDown: true,
+    },
+    {
+      title: 'Monthly work hours',
+      value: '158 hours',
+      valueSubtext: '+20% vs past month',
+      icon: 'fa-calendar-alt',
+      iconBg: 'orange' as const,
+      trendDown: false,
+    },
+    {
+      title: 'Earned funds',
+      value: '1,5k $',
+      valueSubtext: '+5% vs past month',
+      icon: 'fa-dollar-sign',
+      iconBg: 'green' as const,
+      trendDown: false,
+    },
   ];
 
   donutData: DonutChartItem[] = [
-    { label: 'Income', value: 167884.21, color: '#F97316' },
-    { label: 'Spends', value: 56411.33, color: '#3B82F6' },
-    { label: 'Installment', value: 81981.22, color: '#22C55E' },
-    { label: 'Invest', value: 12432.51, color: '#EC4899' },
+    { label: 'Central area', value: 52, color: '#22C55E' },
+    { label: 'South-Western area', value: 15, color: '#86EFAC' },
+    { label: 'Eastern area', value: 33, color: '#F97316' },
   ];
 
-  lineSeries: LineSeries[] = [
-    { name: 'Series 1', data: [95, 90, 70, 45, 35, 28], color: '#3B82F6' },
-    { name: 'Series 2', data: [85, 75, 55, 40, 32, 25], color: '#F97316' },
+  contributionMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  insuranceContributionTrend: LineSeries[] = [
+    {
+      name: 'Contribution',
+      data: [420, 445, 438, 460, 472, 488, 495, 510, 518, 532, 540, 558],
+      color: '#22C55E',
+    },
   ];
-  lineXLabels = ['Week 01', 'Week 02', 'Week 03', 'Week 04', 'Week 05', 'Week 10'];
+  monthlyContributionBars: BarChartItem[] = [
+    { label: 'Jan', value: 420 },
+    { label: 'Feb', value: 445 },
+    { label: 'Mar', value: 438 },
+    { label: 'Apr', value: 460 },
+    { label: 'May', value: 472 },
+    { label: 'Jun', value: 488 },
+    { label: 'Jul', value: 495 },
+    { label: 'Aug', value: 510 },
+    { label: 'Sep', value: 518 },
+    { label: 'Oct', value: 532 },
+    { label: 'Nov', value: 540 },
+    { label: 'Dec', value: 558 },
+  ];
 
-  balanceCards = [
-    { theme: 'green' as const, title: 'Main Balance', value: '$22,466.24', cardHolder: 'CARD HOLDER William Fancyson' },
-    { theme: 'blue' as const, title: 'Main Balance', value: '$22,466.24', cardHolder: 'CARD HOLDER William Fancyson' },
-    { theme: 'purple' as const, title: 'Main Balance', value: '$22,466.24', cardHolder: 'CARD HOLDER William Fancyson' },
-    { theme: 'orange' as const, title: 'Main Balance', value: '$22,466.24', cardHolder: 'CARD HOLDER William Fancyson' },
-  ];
-
-  recentActivities = [
-    { name: 'Bitcoin', time: '06:24:45 AM', amount: '+$5,553', status: 'Completed', iconLetter: 'B', iconBg: 'bg-green-100', iconColor: 'text-green-600', amountClass: 'text-green-600', badgeClass: 'bg-green-100 text-green-700' },
-    { name: 'Monero', time: '05:12:30 AM', amount: '-$1,200', status: 'Pending', iconLetter: 'M', iconBg: 'bg-orange-100', iconColor: 'text-orange-600', amountClass: 'text-red-600', badgeClass: 'bg-amber-100 text-amber-700' },
-    { name: 'Litecoin', time: '04:58:12 AM', amount: '+$2,100', status: 'Completed', iconLetter: 'L', iconBg: 'bg-sky-100', iconColor: 'text-sky-600', amountClass: 'text-green-600', badgeClass: 'bg-green-100 text-green-700' },
-  ];
-
-  sellOrders = [
-    { price: '$42,150.00', amount: '0.024', total: '$1,011.60' },
-    { price: '$42,140.00', amount: '0.051', total: '$2,149.14' },
-    { price: '$42,130.00', amount: '0.010', total: '$421.30' },
-  ];
-  buyOrders = [
-    { price: '$158.20', amount: '2.50', total: '$395.50' },
-    { price: '$158.10', amount: '1.20', total: '$189.72' },
-    { price: '$158.00', amount: '0.80', total: '$126.40' },
+  ordersHistory = [
+    { orderNumber: '#12345678', status: 'Completed', statusClass: 'text-green-600', statusIcon: 'fa-check-circle', dateTime: '1/10/2024 at 5:12 PM', amount: '$ 32,85' },
+    { orderNumber: '#12345679', status: 'Pending', statusClass: 'text-amber-600', statusIcon: 'fa-clock', dateTime: '1/10/2024 at 4:32 PM', amount: '$ 18,50' },
+    { orderNumber: '#12345680', status: 'Failed', statusClass: 'text-red-600', statusIcon: 'fa-times-circle', dateTime: '1/10/2024 at 3:45 PM', amount: '$ 42,00' },
+    { orderNumber: '#12345681', status: 'Completed', statusClass: 'text-green-600', statusIcon: 'fa-check-circle', dateTime: '1/10/2024 at 2:20 PM', amount: '$ 25,30' },
+    { orderNumber: '#12345682', status: 'Pending', statusClass: 'text-amber-600', statusIcon: 'fa-clock', dateTime: '1/10/2024 at 1:15 PM', amount: '$ 67,90' },
   ];
 }

@@ -6,15 +6,24 @@ import { DonutChartItem } from '../../models/chart.model';
   standalone: true,
   template: `
     <div class="flex flex-col sm:flex-row items-center gap-6">
-      <div #chartContainer class="flex-shrink-0" [style.height.px]="chartHeight()"></div>
+      <div class="relative flex-shrink-0" [style.height.px]="chartHeight()" [style.width.px]="chartHeight()">
+        <div #chartContainer class="w-full h-full"></div>
+        @if (centerTitle() || centerValue()) {
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            @if (centerTitle()) {
+              <span class="text-sm font-medium text-gray-500">{{ centerTitle() }}</span>
+            }
+            @if (centerValue()) {
+              <span class="text-2xl font-bold text-gray-900">{{ centerValue() }}</span>
+            }
+          </div>
+        }
+      </div>
       <ul class="space-y-3 flex-1 min-w-0 w-full">
         @for (item of legendItems(); track item.label) {
-          <li class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full flex-shrink-0" [style.background]="item.color"></span>
-              <span class="text-sm text-gray-700">{{ item.label }} ({{ item.percentage }}%)</span>
-            </div>
-            <span class="text-sm font-medium text-gray-900">{{ item.formattedValue }}</span>
+          <li class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full flex-shrink-0" [style.background]="item.color"></span>
+            <span class="text-sm text-gray-700">{{ item.label }} ({{ item.percentage }}%)</span>
           </li>
         }
       </ul>
@@ -28,6 +37,8 @@ export class DonutChartComponent implements AfterViewInit {
   title = input<string>();
   height = input<string>('320');
   chartHeight = input<number>(200);
+  centerTitle = input<string>();
+  centerValue = input<string>();
 
   legendItems = computed(() => {
     const d = this.data();
@@ -63,7 +74,8 @@ export class DonutChartComponent implements AfterViewInit {
       marker: { colors: d.map((i) => i.color) },
       hole: 0.5,
       showlegend: false,
-      textinfo: 'none',
+      textinfo: 'percent',
+      textposition: 'inside',
     };
     const layout = {
       margin: { t: 10, b: 10, l: 10, r: 10 },
