@@ -1,0 +1,167 @@
+/* Match index.html layout and styles */
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+}
+.ifrs-header {
+  background: #1a365d;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px 8px 0 0;
+}
+.ifrs-header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+.ifrs-header p {
+  margin: 0.25rem 0 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+.ifrs-nav {
+  background: #2d3748;
+  color: #fff;
+  padding: 0.5rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+}
+.ifrs-nav a {
+  color: #90cdf4;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.ifrs-nav a:hover {
+  text-decoration: underline;
+}
+
+.ifrs-section {
+  background: #fff;
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.ifrs-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+  color: #1a365d;
+  border-bottom: 2px solid #2b6cb0;
+  padding-bottom: 0.35rem;
+}
+.ifrs-desc {
+  color: #4a5568;
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+}
+.ifrs-h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1rem;
+  color: #2d3748;
+}
+.summary-box {
+  background: #edf2f7;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+.summary-box strong {
+  color: #2d3748;
+}
+
+/* Dashboard cards — index.html style */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.dashboard-cards .card {
+  background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+  color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.dashboard-cards .card .label {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.25rem;
+}
+.dashboard-cards .card .value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.dashboard-cards .card .value small {
+  font-size: 0.7rem;
+  font-weight: 400;
+  opacity: 0.9;
+}
+.dashboard-cards .card .trend {
+  font-size: 0.7rem;
+  margin-top: 0.2rem;
+  opacity: 0.95;
+}
+.dashboard-cards .card .trend.down {
+  color: #feb2b2;
+}
+.dashboard-cards .card .trend.up {
+  color: #9ae6b4;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.chart-box {
+  background: #fafafa;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  position: relative;
+  min-height: 260px;
+}
+.chart-box-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: #2d3748;
+}
+.ifrs-table-wrap {
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+.ifrs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.ifrs-table th,
+.ifrs-table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+}
+.ifrs-table th {
+  background: #edf2f7;
+  font-weight: 600;
+  color: #2d3748;
+}
+.ifrs-table tr:nth-child(even) {
+  background: #fafafa;
+}
+.ifrs-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ifrs-table tr.total {
+  font-weight: 600;
+  background: #ebf8ff !important;
+}

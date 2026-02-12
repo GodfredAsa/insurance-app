@@ -1,0 +1,88 @@
+/**
+ * Static IFRS 17 sample data — same structure as project root ifrs17_sample_data.json / index.html.
+ * Used by the dashboard with no API calls.
+ */
+export const IFRS17_STATIC_DATA = {
+  metadata: {
+    description: 'IFRS 17 sample reporting data',
+    reporting_date: '2024-12-31',
+    currency: 'GHS',
+    portfolios: ['Motor', 'Property', 'Life'] as const,
+  },
+  contracts: [
+    { contract_id: 'MTR-2023-001', portfolio: 'Motor', product: 'Motor Comprehensive', inception_date: '2023-01-15', coverage_end_date: '2024-01-14', measurement_model: 'PAA', cohort_year: 2023, currency: 'USD' },
+    { contract_id: 'MTR-2023-002', portfolio: 'Motor', product: 'Motor Third Party', inception_date: '2023-06-01', coverage_end_date: '2024-05-31', measurement_model: 'PAA', cohort_year: 2023, currency: 'USD' },
+    { contract_id: 'MTR-2024-001', portfolio: 'Motor', product: 'Motor Comprehensive', inception_date: '2024-03-01', coverage_end_date: '2025-02-28', measurement_model: 'PAA', cohort_year: 2024, currency: 'USD' },
+    { contract_id: 'PRP-2023-001', portfolio: 'Property', product: 'Fire and Theft', inception_date: '2023-04-01', coverage_end_date: '2024-03-31', measurement_model: 'PAA', cohort_year: 2023, currency: 'USD' },
+    { contract_id: 'PRP-2024-001', portfolio: 'Property', product: 'Fire and Theft', inception_date: '2024-07-01', coverage_end_date: '2025-06-30', measurement_model: 'PAA', cohort_year: 2024, currency: 'USD' },
+    { contract_id: 'LIF-2022-001', portfolio: 'Life', product: 'Term Life', inception_date: '2022-01-01', coverage_end_date: '2032-12-31', measurement_model: 'GMM', cohort_year: 2022, currency: 'USD' },
+    { contract_id: 'LIF-2023-001', portfolio: 'Life', product: 'Term Life', inception_date: '2023-01-01', coverage_end_date: '2033-12-31', measurement_model: 'GMM', cohort_year: 2023, currency: 'USD' },
+  ],
+  premiums: [
+    { contract_id: 'MTR-2023-001', period: '2023-Q1', gross_premium: 1200, ceded_premium: 180, net_premium: 1020, received_date: '2023-01-15' },
+    { contract_id: 'MTR-2023-002', period: '2023-Q2', gross_premium: 600, ceded_premium: 60, net_premium: 540, received_date: '2023-06-01' },
+    { contract_id: 'MTR-2024-001', period: '2024-Q1', gross_premium: 1350, ceded_premium: 200, net_premium: 1150, received_date: '2024-03-01' },
+    { contract_id: 'PRP-2023-001', period: '2023-Q2', gross_premium: 2400, ceded_premium: 360, net_premium: 2040, received_date: '2023-04-01' },
+    { contract_id: 'PRP-2024-001', period: '2024-Q3', gross_premium: 2600, ceded_premium: 390, net_premium: 2210, received_date: '2024-07-01' },
+    { contract_id: 'LIF-2022-001', period: '2024', gross_premium: 500, ceded_premium: 0, net_premium: 500, received_date: '2024-01-15' },
+    { contract_id: 'LIF-2023-001', period: '2024', gross_premium: 550, ceded_premium: 0, net_premium: 550, received_date: '2024-01-20' },
+  ],
+  claims: [
+    { contract_id: 'MTR-2023-001', claim_id: 'CLM-001', incurred_date: '2023-08-01', paid_date: '2023-09-15', incurred_amount: 4500, paid_amount: 4500, outstanding_reserve: 0 },
+    { contract_id: 'MTR-2023-002', claim_id: 'CLM-002', incurred_date: '2024-02-10', paid_date: null, incurred_amount: 1200, paid_amount: 400, outstanding_reserve: 800 },
+    { contract_id: 'PRP-2023-001', claim_id: 'CLM-003', incurred_date: '2023-11-15', paid_date: '2024-01-20', incurred_amount: 8500, paid_amount: 8500, outstanding_reserve: 0 },
+    { contract_id: 'PRP-2024-001', claim_id: 'CLM-004', incurred_date: '2024-09-01', paid_date: null, incurred_amount: 3200, paid_amount: 0, outstanding_reserve: 3200 },
+  ],
+  acquisition_costs: [
+    { contract_id: 'MTR-2023-001', period: '2023', commission: 120, underwriting_cost: 45, total: 165 },
+    { contract_id: 'MTR-2023-002', period: '2023', commission: 60, underwriting_cost: 25, total: 85 },
+    { contract_id: 'MTR-2024-001', period: '2024', commission: 135, underwriting_cost: 50, total: 185 },
+    { contract_id: 'PRP-2023-001', period: '2023', commission: 240, underwriting_cost: 80, total: 320 },
+    { contract_id: 'PRP-2024-001', period: '2024', commission: 260, underwriting_cost: 90, total: 350 },
+    { contract_id: 'LIF-2022-001', period: '2022', commission: 75, underwriting_cost: 100, total: 175 },
+    { contract_id: 'LIF-2023-001', period: '2023', commission: 82, underwriting_cost: 110, total: 192 },
+  ],
+  assumptions: [
+    { portfolio: 'Motor', assumption_type: 'lapse_rate', value_pct: 8, effective_date: '2024-01-01', description: 'Annual policy lapse rate' },
+    { portfolio: 'Motor', assumption_type: 'claim_inflation', value_pct: 5, effective_date: '2024-01-01', description: 'Expected claims inflation' },
+    { portfolio: 'Property', assumption_type: 'lapse_rate', value_pct: 6, effective_date: '2024-01-01', description: 'Annual policy lapse rate' },
+    { portfolio: 'Property', assumption_type: 'claim_inflation', value_pct: 4, effective_date: '2024-01-01', description: 'Expected claims inflation' },
+    { portfolio: 'Life', assumption_type: 'mortality_rate_base', value_pct: 0.12, effective_date: '2024-01-01', description: 'Base mortality per 1000' },
+    { portfolio: 'Life', assumption_type: 'lapse_rate', value_pct: 4, effective_date: '2024-01-01', description: 'Annual lapse rate' },
+  ],
+  discount_rates: [
+    { term_years: 1, rate_pct: 4.5, as_at_date: '2024-12-31' },
+    { term_years: 2, rate_pct: 4.6, as_at_date: '2024-12-31' },
+    { term_years: 3, rate_pct: 4.7, as_at_date: '2024-12-31' },
+    { term_years: 5, rate_pct: 4.8, as_at_date: '2024-12-31' },
+    { term_years: 10, rate_pct: 5, as_at_date: '2024-12-31' },
+  ],
+  reinsurance: [
+    { contract_id: 'MTR-2023-001', reinsurer: 'Reinsurer A', ceded_premium_ytd: 180, recoveries_ytd: 0, reinsurance_asset_balance: 45 },
+    { contract_id: 'MTR-2023-002', reinsurer: 'Reinsurer A', ceded_premium_ytd: 60, recoveries_ytd: 0, reinsurance_asset_balance: 15 },
+    { contract_id: 'MTR-2024-001', reinsurer: 'Reinsurer A', ceded_premium_ytd: 200, recoveries_ytd: 0, reinsurance_asset_balance: 80 },
+    { contract_id: 'PRP-2023-001', reinsurer: 'Reinsurer B', ceded_premium_ytd: 360, recoveries_ytd: 2125, reinsurance_asset_balance: 0 },
+    { contract_id: 'PRP-2024-001', reinsurer: 'Reinsurer B', ceded_premium_ytd: 390, recoveries_ytd: 0, reinsurance_asset_balance: 800 },
+  ],
+  liability_movements: [
+    { portfolio: 'Motor', cohort_year: 2023, opening_balance: 420, new_contracts: 0, premiums_received: -380, claims_incurred: 200, csm_release: -180, experience_variance: 15, closing_balance: 275 },
+    { portfolio: 'Motor', cohort_year: 2024, opening_balance: 0, new_contracts: 720, premiums_received: -350, claims_incurred: 0, csm_release: -120, experience_variance: 0, closing_balance: 250 },
+    { portfolio: 'Property', cohort_year: 2023, opening_balance: 980, new_contracts: 0, premiums_received: -510, claims_incurred: 0, csm_release: -350, experience_variance: -20, closing_balance: 100 },
+    { portfolio: 'Property', cohort_year: 2024, opening_balance: 0, new_contracts: 1320, premiums_received: -440, claims_incurred: 800, csm_release: -200, experience_variance: 0, closing_balance: 480 },
+    { portfolio: 'Life', cohort_year: 2022, opening_balance: 4200, new_contracts: 0, premiums_received: -500, claims_incurred: 0, csm_release: 280, experience_variance: 50, closing_balance: 4030 },
+    { portfolio: 'Life', cohort_year: 2023, opening_balance: 3800, new_contracts: 0, premiums_received: -550, claims_incurred: 0, csm_release: 320, experience_variance: -30, closing_balance: 3540 },
+  ],
+  csm_movements: [
+    { portfolio: 'Motor', cohort_year: 2023, opening_csm: 180, initial_recognition: 0, changes_in_estimates: -5, csm_release_to_pl: -180, closing_csm: 0 },
+    { portfolio: 'Motor', cohort_year: 2024, opening_csm: 0, initial_recognition: 280, changes_in_estimates: 0, csm_release_to_pl: -120, closing_csm: 160 },
+    { portfolio: 'Property', cohort_year: 2023, opening_csm: 350, initial_recognition: 0, changes_in_estimates: 10, csm_release_to_pl: -350, closing_csm: 0 },
+    { portfolio: 'Property', cohort_year: 2024, opening_csm: 0, initial_recognition: 420, changes_in_estimates: -20, csm_release_to_pl: -200, closing_csm: 200 },
+    { portfolio: 'Life', cohort_year: 2022, opening_csm: 2520, initial_recognition: 0, changes_in_estimates: 50, csm_release_to_pl: 280, closing_csm: 2290 },
+    { portfolio: 'Life', cohort_year: 2023, opening_csm: 2240, initial_recognition: 0, changes_in_estimates: -30, csm_release_to_pl: 320, closing_csm: 1890 },
+  ],
+  claims_development: [
+    { cohort_year: 2022, development_year_1: 0, development_year_2: 0, development_year_3: 0, incremental_claims: 0 },
+    { cohort_year: 2023, development_year_1: 14200, development_year_2: 800, development_year_3: null, incremental_claims: 15000 },
+    { cohort_year: 2024, development_year_1: 3200, development_year_2: null, development_year_3: null, incremental_claims: 3200 },
+  ],
+} as const;
