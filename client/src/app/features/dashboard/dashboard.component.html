@@ -436,7 +436,7 @@
         <tbody>
           @for (r of cl; track r.claim_id) {
             <tr>
-              <td>{{ r.contract_id }}</td><td>{{ r.claim_id }}</td><td>{{ r.incurred_date ?? '—' }}</td>
+              <td>{{ r.contract_id }}</td><td>{{ r.claim_id }}</td><td>{{ r.incurred_date || '—' }}</td>
               <td class="num">{{ fmtNum(r.incurred_amount) }}</td><td class="num">{{ fmtNum(r.paid_amount) }}</td>
               <td class="num">{{ fmtNum(r.outstanding_reserve) }}</td>
             </tr>

@@ -1,13 +1,17 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { SidebarComponent, SidebarUser } from './shared/components/sidebar/sidebar.component';
 import { NavItemConfig } from './shared/models/nav-item.model';
+import { NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, SidebarComponent],
   template: `
+    @if (showAppLayout()) {
     <div class="flex min-h-screen bg-gray-100 text-gray-800">
       <app-sidebar
         [collapsed]="sidebarCollapsed()"
@@ -49,10 +53,16 @@ import { NavItemConfig } from './shared/models/nav-item.model';
         <router-outlet />
       </main>
     </div>
+    } @else {
+    <router-outlet />
+    }
   `,
   styles: [],
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private sub?: Subscription;
+  showAppLayout = signal(true);
   sidebarCollapsed = signal(false);
   sidebarUser: () => SidebarUser | null = () => ({
     name: 'Mike',
@@ -83,5 +93,17 @@ export class AppComponent {
     const u = this.sidebarUser();
     if (u?.avatarUrl) return u.avatarUrl;
     return 'https://ui-avatars.com/api/?name=Mike&background=dcfce7&color=16a34a';
+  }
+
+  ngOnInit(): void {
+    const hideLayout = (url: string) =>
+      url.startsWith('/login') || url.startsWith('/signup');
+    this.showAppLayout.set(!hideLayout(this.router.url));
+    this.sub = this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => this.showAppLayout.set(!hideLayout(e.urlAfterRedirects)));
+  }
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 }

@@ -1,0 +1,69 @@
+<div class="login-page">
+  <div class="login-left">
+    <div class="login-illustration">
+      <div class="illustration-scene">
+        <div class="scene-desk"></div>
+        <div class="scene-laptop"></div>
+        <div class="scene-character"></div>
+        <div class="scene-mug"></div>
+        <div class="scene-plant"></div>
+      </div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-card">
+      <div class="login-brand">
+        <span class="brand-icon">◆</span>
+        <span class="brand-name">IFRS 17</span>
+      </div>
+      <h1 class="login-title">Log in</h1>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <input
+            type="email"
+            formControlName="email"
+            class="form-input"
+            placeholder="Email address"
+            autocomplete="email"
+          />
+          @if (email?.invalid && email?.touched) {
+            <p class="form-error">
+              @if (email?.errors?.['required']) { Email is required. }
+              @if (email?.errors?.['email']) { Please enter a valid email address. }
+            </p>
+          }
+        </div>
+        <div class="form-group">
+          <div class="input-wrap">
+            <input
+              [type]="pinVisible ? 'text' : 'password'"
+              formControlName="pin"
+              class="form-input"
+              placeholder="Pin (4 digits)"
+              autocomplete="off"
+              inputmode="numeric"
+              maxlength="4"
+              (input)="onPinInput($event)"
+            />
+            <button type="button" class="pin-toggle" (click)="pinVisible = !pinVisible" tabindex="-1" title="Toggle visibility">
+              <i class="fas" [ngClass]="pinVisible ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </button>
+          </div>
+          @if (pin?.invalid && pin?.touched) {
+            <p class="form-error">
+              @if (pin?.errors?.['required']) { Pin is required. }
+              @if (pin?.errors?.['minlength'] || pin?.errors?.['maxLength']) { Pin must be 4 digits. }
+              @if (pin?.errors?.['pinFormat']) { Pin must be exactly 4 numbers. }
+            </p>
+          }
+        </div>
+        <button type="submit" class="btn-login">Log in</button>
+      </form>
+
+        <p class="login-footer">
+        Don't have an account? <a routerLink="/signup" class="link">Create an account</a>
+      </p>
+    </div>
+  </div>
+</div>
