@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IFRS 17 — Sample Data Analysis</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; background: #f5f5f5; color: #222; line-height: 1.5; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem; }
+    header { background: #1a365d; color: #fff; padding: 1rem 1.5rem; }
+    header h1 { margin: 0; font-size: 1.35rem; }
+    header p { margin: 0.25rem 0 0; opacity: 0.9; font-size: 0.9rem; }
+    nav { background: #2d3748; color: #fff; padding: 0.5rem 1.5rem; position: sticky; top: 0; z-index: 10; }
+    nav a { color: #90cdf4; text-decoration: none; margin-right: 1rem; font-size: 0.9rem; }
+    nav a:hover { text-decoration: underline; }
+    section { background: #fff; margin: 1.5rem 0; padding: 1.25rem 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    section h2 { margin: 0 0 0.75rem; font-size: 1.15rem; color: #1a365d; border-bottom: 2px solid #2b6cb0; padding-bottom: 0.35rem; }
+    section h3 { margin: 1rem 0 0.5rem; font-size: 1rem; color: #2d3748; }
+    section p.desc { color: #4a5568; font-size: 0.9rem; margin: 0 0 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+    th { background: #edf2f7; font-weight: 600; color: #2d3748; }
+    tr:nth-child(even) { background: #fafafa; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .total { font-weight: 600; background: #ebf8ff !important; }
+    .footnote { font-size: 0.8rem; color: #718096; margin-top: 0.5rem; }
+    .summary-box { background: #edf2f7; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; }
+    .summary-box strong { color: #2d3748; }
+    .dashboard-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+    .dashboard-cards .card { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); color: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .dashboard-cards .card .label { font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 0.25rem; }
+    .dashboard-cards .card .value { font-size: 1.25rem; font-weight: 700; }
+    .dashboard-cards .card .value small { font-size: 0.7rem; font-weight: 400; opacity: 0.9; }
+    .chart-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+    .chart-box { background: #fafafa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; position: relative; height: 260px; }
+    .chart-box h4 { margin: 0 0 0.5rem; font-size: 0.9rem; color: #2d3748; }
+    .chart-box canvas { max-height: 220px; }
+    .card .trend { font-size: 0.7rem; margin-top: 0.2rem; opacity: 0.95; }
+    .card .trend.down { color: #feb2b2; }
+    .card .trend.up { color: #9ae6b4; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>IFRS 17 — Sample Data Analysis</h1>
+      <p>Reporting date: 2024-12-31 | Currency: GHS | Portfolios: Motor, Property, Life</p>
+    </div>
+  </header>
+  <nav>
+    <div class="wrap">
+      <a href="#dashboard">Summary &amp; charts</a>
+      <a href="#liability">1. Liability reconciliation</a>
+      <a href="#csm">2. CSM reconciliation</a>
+      <a href="#revenue-expense">3. Revenue &amp; expense</a>
+      <a href="#development">4. Premium &amp; claims development</a>
+      <a href="#experience">5. Experience &amp; assumptions</a>
+      <a href="#reinsurance">6. Reinsurance</a>
+      <a href="#concentration">7. Concentration &amp; mix</a>
+      <a href="#discount">8. Discount rates</a>
+      <a href="#assumptions">9. Assumptions</a>
+      <a href="#balances">10. Balances</a>
+      <a href="#new-business">11. New business</a>
+      <a href="#reserves">12. Claims reserves</a>
+    </div>
+  </nav>
+  <div class="wrap" id="main">
+    <!-- Filled by JS -->
+  </div>
+  <script id="sample-data" type="application/json">
+  {"metadata":{"reporting_date":"2024-12-31","currency":"USD","portfolios":["Motor","Property","Life"]},"contracts":[{"contract_id":"MTR-2023-001","portfolio":"Motor","product":"Motor Comprehensive","inception_date":"2023-01-15","coverage_end_date":"2024-01-14","measurement_model":"PAA","cohort_year":2023,"currency":"USD"},{"contract_id":"MTR-2023-002","portfolio":"Motor","product":"Motor Third Party","inception_date":"2023-06-01","coverage_end_date":"2024-05-31","measurement_model":"PAA","cohort_year":2023,"currency":"USD"},{"contract_id":"MTR-2024-001","portfolio":"Motor","product":"Motor Comprehensive","inception_date":"2024-03-01","coverage_end_date":"2025-02-28","measurement_model":"PAA","cohort_year":2024,"currency":"USD"},{"contract_id":"PRP-2023-001","portfolio":"Property","product":"Fire and Theft","inception_date":"2023-04-01","coverage_end_date":"2024-03-31","measurement_model":"PAA","cohort_year":2023,"currency":"USD"},{"contract_id":"PRP-2024-001","portfolio":"Property","product":"Fire and Theft","inception_date":"2024-07-01","coverage_end_date":"2025-06-30","measurement_model":"PAA","cohort_year":2024,"currency":"USD"},{"contract_id":"LIF-2022-001","portfolio":"Life","product":"Term Life","inception_date":"2022-01-01","coverage_end_date":"2032-12-31","measurement_model":"GMM","cohort_year":2022,"currency":"USD"},{"contract_id":"LIF-2023-001","portfolio":"Life","product":"Term Life","inception_date":"2023-01-01","coverage_end_date":"2033-12-31","measurement_model":"GMM","cohort_year":2023,"currency":"USD"}],"premiums":[{"contract_id":"MTR-2023-001","period":"2023-Q1","gross_premium":1200,"ceded_premium":180,"net_premium":1020,"received_date":"2023-01-15"},{"contract_id":"MTR-2023-002","period":"2023-Q2","gross_premium":600,"ceded_premium":60,"net_premium":540,"received_date":"2023-06-01"},{"contract_id":"MTR-2024-001","period":"2024-Q1","gross_premium":1350,"ceded_premium":200,"net_premium":1150,"received_date":"2024-03-01"},{"contract_id":"PRP-2023-001","period":"2023-Q2","gross_premium":2400,"ceded_premium":360,"net_premium":2040,"received_date":"2023-04-01"},{"contract_id":"PRP-2024-001","period":"2024-Q3","gross_premium":2600,"ceded_premium":390,"net_premium":2210,"received_date":"2024-07-01"},{"contract_id":"LIF-2022-001","period":"2024","gross_premium":500,"ceded_premium":0,"net_premium":500,"received_date":"2024-01-15"},{"contract_id":"LIF-2023-001","period":"2024","gross_premium":550,"ceded_premium":0,"net_premium":550,"received_date":"2024-01-20"}],"claims":[{"contract_id":"MTR-2023-001","claim_id":"CLM-001","incurred_date":"2023-08-01","paid_date":"2023-09-15","incurred_amount":4500,"paid_amount":4500,"outstanding_reserve":0},{"contract_id":"MTR-2023-002","claim_id":"CLM-002","incurred_date":"2024-02-10","paid_date":null,"incurred_amount":1200,"paid_amount":400,"outstanding_reserve":800},{"contract_id":"PRP-2023-001","claim_id":"CLM-003","incurred_date":"2023-11-15","paid_date":"2024-01-20","incurred_amount":8500,"paid_amount":8500,"outstanding_reserve":0},{"contract_id":"PRP-2024-001","claim_id":"CLM-004","incurred_date":"2024-09-01","paid_date":null,"incurred_amount":3200,"paid_amount":0,"outstanding_reserve":3200}],"acquisition_costs":[{"contract_id":"MTR-2023-001","period":"2023","commission":120,"underwriting_cost":45,"total":165},{"contract_id":"MTR-2023-002","period":"2023","commission":60,"underwriting_cost":25,"total":85},{"contract_id":"MTR-2024-001","period":"2024","commission":135,"underwriting_cost":50,"total":185},{"contract_id":"PRP-2023-001","period":"2023","commission":240,"underwriting_cost":80,"total":320},{"contract_id":"PRP-2024-001","period":"2024","commission":260,"underwriting_cost":90,"total":350},{"contract_id":"LIF-2022-001","period":"2022","commission":75,"underwriting_cost":100,"total":175},{"contract_id":"LIF-2023-001","period":"2023","commission":82,"underwriting_cost":110,"total":192}],"assumptions":[{"portfolio":"Motor","assumption_type":"lapse_rate","value_pct":8,"effective_date":"2024-01-01","description":"Annual policy lapse rate"},{"portfolio":"Motor","assumption_type":"claim_inflation","value_pct":5,"effective_date":"2024-01-01","description":"Expected claims inflation"},{"portfolio":"Property","assumption_type":"lapse_rate","value_pct":6,"effective_date":"2024-01-01","description":"Annual policy lapse rate"},{"portfolio":"Property","assumption_type":"claim_inflation","value_pct":4,"effective_date":"2024-01-01","description":"Expected claims inflation"},{"portfolio":"Life","assumption_type":"mortality_rate_base","value_pct":0.12,"effective_date":"2024-01-01","description":"Base mortality per 1000"},{"portfolio":"Life","assumption_type":"lapse_rate","value_pct":4,"effective_date":"2024-01-01","description":"Annual lapse rate"}],"discount_rates":[{"term_years":1,"rate_pct":4.5,"as_at_date":"2024-12-31"},{"term_years":2,"rate_pct":4.6,"as_at_date":"2024-12-31"},{"term_years":3,"rate_pct":4.7,"as_at_date":"2024-12-31"},{"term_years":5,"rate_pct":4.8,"as_at_date":"2024-12-31"},{"term_years":10,"rate_pct":5,"as_at_date":"2024-12-31"}],"reinsurance":[{"contract_id":"MTR-2023-001","reinsurer":"Reinsurer A","ceded_premium_ytd":180,"recoveries_ytd":0,"reinsurance_asset_balance":45},{"contract_id":"MTR-2023-002","reinsurer":"Reinsurer A","ceded_premium_ytd":60,"recoveries_ytd":0,"reinsurance_asset_balance":15},{"contract_id":"MTR-2024-001","reinsurer":"Reinsurer A","ceded_premium_ytd":200,"recoveries_ytd":0,"reinsurance_asset_balance":80},{"contract_id":"PRP-2023-001","reinsurer":"Reinsurer B","ceded_premium_ytd":360,"recoveries_ytd":2125,"reinsurance_asset_balance":0},{"contract_id":"PRP-2024-001","reinsurer":"Reinsurer B","ceded_premium_ytd":390,"recoveries_ytd":0,"reinsurance_asset_balance":800}],"liability_movements":[{"portfolio":"Motor","cohort_year":2023,"opening_balance":420,"new_contracts":0,"premiums_received":-380,"claims_incurred":200,"csm_release":-180,"experience_variance":15,"closing_balance":275},{"portfolio":"Motor","cohort_year":2024,"opening_balance":0,"new_contracts":720,"premiums_received":-350,"claims_incurred":0,"csm_release":-120,"experience_variance":0,"closing_balance":250},{"portfolio":"Property","cohort_year":2023,"opening_balance":980,"new_contracts":0,"premiums_received":-510,"claims_incurred":0,"csm_release":-350,"experience_variance":-20,"closing_balance":100},{"portfolio":"Property","cohort_year":2024,"opening_balance":0,"new_contracts":1320,"premiums_received":-440,"claims_incurred":800,"csm_release":-200,"experience_variance":0,"closing_balance":480},{"portfolio":"Life","cohort_year":2022,"opening_balance":4200,"new_contracts":0,"premiums_received":-500,"claims_incurred":0,"csm_release":280,"experience_variance":50,"closing_balance":4030},{"portfolio":"Life","cohort_year":2023,"opening_balance":3800,"new_contracts":0,"premiums_received":-550,"claims_incurred":0,"csm_release":320,"experience_variance":-30,"closing_balance":3540}],"csm_movements":[{"portfolio":"Motor","cohort_year":2023,"opening_csm":180,"initial_recognition":0,"changes_in_estimates":-5,"csm_release_to_pl":-180,"closing_csm":0},{"portfolio":"Motor","cohort_year":2024,"opening_csm":0,"initial_recognition":280,"changes_in_estimates":0,"csm_release_to_pl":-120,"closing_csm":160},{"portfolio":"Property","cohort_year":2023,"opening_csm":350,"initial_recognition":0,"changes_in_estimates":10,"csm_release_to_pl":-350,"closing_csm":0},{"portfolio":"Property","cohort_year":2024,"opening_csm":0,"initial_recognition":420,"changes_in_estimates":-20,"csm_release_to_pl":-200,"closing_csm":200},{"portfolio":"Life","cohort_year":2022,"opening_csm":2520,"initial_recognition":0,"changes_in_estimates":50,"csm_release_to_pl":280,"closing_csm":2290},{"portfolio":"Life","cohort_year":2023,"opening_csm":2240,"initial_recognition":0,"changes_in_estimates":-30,"csm_release_to_pl":320,"closing_csm":1890}],"claims_development":[{"cohort_year":2022,"development_year_1":0,"development_year_2":0,"development_year_3":0,"incremental_claims":0},{"cohort_year":2023,"development_year_1":14200,"development_year_2":800,"development_year_3":null,"incremental_claims":15000},{"cohort_year":2024,"development_year_1":3200,"development_year_2":null,"development_year_3":null,"incremental_claims":3200}]}
+  </script>
+  <script>
+    (function() {
+      var data = JSON.parse(document.getElementById('sample-data').textContent);
+      var lm = data.liability_movements;
+      var cm = data.csm_movements;
+      var prem = data.premiums;
+      var cl = data.claims;
+      var ac = data.acquisition_costs;
+      var rein = data.reinsurance;
+      var contracts = data.contracts;
+      var assump = data.assumptions;
+      var disc = data.discount_rates;
+      var dev = data.claims_development;
+
+      var CURRENCY = 'GHS';
+      function fmtNum(n) { return n == null ? '—' : Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+      function fmtPct(n) { return n == null ? '—' : Number(n) + '%'; }
+      function trendPct(current, prior) { if (prior == null || prior === 0) return null; return (((current - prior) / prior) * 100); }
+      function trendHtml(val) { if (val == null) return ''; var up = val >= 0; return '<div class="trend ' + (up ? 'up' : 'down') + '">' + (up ? '↑' : '↓') + ' ' + Math.abs(val).toFixed(1) + '% vs opening</div>'; }
+
+      function table(heads, rows, cls) {
+        var h = '<table>' + '<thead><tr>' + heads.map(function(h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>';
+        rows.forEach(function(r) {
+          h += '<tr' + (r.total ? ' class="total"' : '') + '>' + r.cells.map(function(c) { return '<td' + (c.num ? ' class="num"' : '') + '>' + c.val + '</td>'; }).join('') + '</tr>';
+        });
+        return h + '</tbody></table>';
+      }
+
+      var totalLiabilityClose = lm.reduce(function(s, r) { return s + r.closing_balance; }, 0);
+      var totalLiabilityOpen = lm.reduce(function(s, r) { return s + r.opening_balance; }, 0);
+      var totalCSMRelease = cm.reduce(function(s, r) { return s + (r.csm_release_to_pl || 0); }, 0);
+      var totalGross = prem.reduce(function(s, r) { return s + r.gross_premium; }, 0);
+      var totalCeded = prem.reduce(function(s, r) { return s + r.ceded_premium; }, 0);
+      var totalIncurred = cl.reduce(function(s, r) { return s + r.incurred_amount; }, 0);
+      var totalPaid = cl.reduce(function(s, r) { return s + (r.paid_amount || 0); }, 0);
+      var totalOutstanding = cl.reduce(function(s, r) { return s + (r.outstanding_reserve || 0); }, 0);
+      var totalAcq = ac.reduce(function(s, r) { return s + r.total; }, 0);
+      var totalReinAsset = rein.reduce(function(s, r) { return s + r.reinsurance_asset_balance; }, 0);
+      var totalCededYtd = rein.reduce(function(s, r) { return s + r.ceded_premium_ytd; }, 0);
+      var totalRecoveries = rein.reduce(function(s, r) { return s + r.recoveries_ytd; }, 0);
+
+      var totalNet = prem.reduce(function(s, r) { return s + r.net_premium; }, 0);
+      var totalCSMClose = cm.reduce(function(s, r) { return s + r.closing_csm; }, 0);
+      var totalCSMOpen = cm.reduce(function(s, r) { return s + r.opening_csm; }, 0);
+      var lossRatioPct = totalNet ? ((totalIncurred / totalNet) * 100).toFixed(1) : '—';
+      var liabilityTrend = trendPct(totalLiabilityClose, totalLiabilityOpen);
+      var csmTrend = trendPct(totalCSMClose, totalCSMOpen);
+
+      var byPortfolio = { Motor: { premium: 0, claims: 0, liability: 0, csm: 0, count: 0, opening: 0 }, Property: { premium: 0, claims: 0, liability: 0, csm: 0, count: 0, opening: 0 }, Life: { premium: 0, claims: 0, liability: 0, csm: 0, count: 0, opening: 0 } };
+      contracts.forEach(function(c) {
+        if (!byPortfolio[c.portfolio]) byPortfolio[c.portfolio] = { premium: 0, claims: 0, liability: 0, csm: 0, count: 0, opening: 0 };
+        byPortfolio[c.portfolio].count++;
+      });
+      prem.forEach(function(r) {
+        var p = contracts.find(function(c) { return c.contract_id === r.contract_id; });
+        if (p && byPortfolio[p.portfolio]) byPortfolio[p.portfolio].premium += r.gross_premium;
+      });
+      cl.forEach(function(r) {
+        var p = contracts.find(function(c) { return c.contract_id === r.contract_id; });
+        if (p && byPortfolio[p.portfolio]) byPortfolio[p.portfolio].claims += r.incurred_amount;
+      });
+      lm.forEach(function(r) {
+        if (byPortfolio[r.portfolio]) { byPortfolio[r.portfolio].liability += r.closing_balance; byPortfolio[r.portfolio].opening += r.opening_balance; }
+      });
+      cm.forEach(function(r) {
+        if (byPortfolio[r.portfolio]) byPortfolio[r.portfolio].csm += r.closing_csm;
+      });
+
+      var liabilityByCohort = [2022, 2023, 2024].map(function(y) { return lm.filter(function(r) { return r.cohort_year === y; }).reduce(function(s, r) { return s + r.closing_balance; }, 0); });
+      var csmByCohort = [2022, 2023, 2024].map(function(y) { return cm.filter(function(r) { return r.cohort_year === y; }).reduce(function(s, r) { return s + r.closing_csm; }, 0); });
+
+      var dashboardBody = '<p class="desc">Key metrics and visual comparison across portfolios (Motor, Property, Life). All amounts in GHS.</p>' +
+        '<div class="dashboard-cards">' +
+        '<div class="card"><div class="label">Insurance liability</div><div class="value">' + fmtNum(totalLiabilityClose) + ' <small>GHS</small></div>' + trendHtml(liabilityTrend) + '</div>' +
+        '<div class="card"><div class="label">Reinsurance asset</div><div class="value">' + fmtNum(totalReinAsset) + ' <small>GHS</small></div></div>' +
+        '<div class="card"><div class="label">Closing CSM</div><div class="value">' + fmtNum(totalCSMClose) + ' <small>GHS</small></div>' + trendHtml(csmTrend) + '</div>' +
+        '<div class="card"><div class="label">Gross premium</div><div class="value">' + fmtNum(totalGross) + ' <small>GHS</small></div></div>' +
+        '<div class="card"><div class="label">Net premium</div><div class="value">' + fmtNum(totalNet) + ' <small>GHS</small></div></div>' +
+        '<div class="card"><div class="label">Claims incurred</div><div class="value">' + fmtNum(totalIncurred) + ' <small>GHS</small></div></div>' +
+        '<div class="card"><div class="label">Loss ratio</div><div class="value">' + lossRatioPct + ' <small>%</small></div></div>' +
+        '<div class="card"><div class="label">Contracts</div><div class="value">' + contracts.length + '</div></div>' +
+        '</div>' +
+        '<h3>Performance by portfolio</h3>' +
+        '<div class="chart-row">' +
+        '<div class="chart-box"><h4>Gross premium by portfolio</h4><canvas id="chart-pie-premium"></canvas></div>' +
+        '<div class="chart-box"><h4>Closing liability by portfolio</h4><canvas id="chart-pie-liability"></canvas></div>' +
+        '</div>' +
+        '<div class="chart-row">' +
+        '<div class="chart-box"><h4>Premium vs claims by portfolio</h4><canvas id="chart-bar-premium-claims"></canvas></div>' +
+        '<div class="chart-box"><h4>Opening vs closing liability</h4><canvas id="chart-bar-opening-closing"></canvas></div>' +
+        '</div>' +
+        '<h3>Trend analysis</h3>' +
+        '<div class="chart-row">' +
+        '<div class="chart-box"><h4>Liability trend by cohort year</h4><canvas id="chart-line-liability-trend"></canvas></div>' +
+        '<div class="chart-box"><h4>CSM trend by cohort year</h4><canvas id="chart-line-csm-trend"></canvas></div>' +
+        '</div>' +
+        '<h3>Portfolio comparison</h3>' +
+        table(
+          ['Portfolio', 'Contracts', 'Gross premium', 'Claims', 'Loss %', 'Closing liability', 'Closing CSM'],
+          Object.keys(byPortfolio).map(function(port) {
+            var x = byPortfolio[port];
+            var lossPct = x.premium ? ((x.claims / x.premium) * 100).toFixed(1) : '—';
+            return { cells: [ { val: port }, { val: x.count, num: true }, { val: fmtNum(x.premium), num: true }, { val: fmtNum(x.claims), num: true }, { val: lossPct + '%', num: true }, { val: fmtNum(x.liability), num: true }, { val: fmtNum(x.csm), num: true } ] };
+          })
+        );
+
+      var sections = [
+        { id: 'dashboard', title: 'Insurance performance summary & charts', desc: 'Top-level KPIs, charts by portfolio, and comparison analysis.',
+          body: dashboardBody },
+        { id: 'liability', title: '1. Insurance contract liability reconciliation', desc: 'Reconciliation of carrying amount from opening to closing by portfolio and cohort.',
+          body: table(
+            ['Portfolio', 'Cohort', 'Opening', 'New contracts', 'Premiums rec\'d', 'Claims incurred', 'CSM release', 'Experience var.', 'Closing'],
+            lm.map(function(r) {
+              return { cells: [
+                { val: r.portfolio }, { val: r.cohort_year },
+                { val: fmtNum(r.opening_balance), num: true }, { val: fmtNum(r.new_contracts), num: true },
+                { val: fmtNum(r.premiums_received), num: true }, { val: fmtNum(r.claims_incurred), num: true },
+                { val: fmtNum(r.csm_release), num: true }, { val: fmtNum(r.experience_variance), num: true },
+                { val: fmtNum(r.closing_balance), num: true }
+              ] };
+            }).concat([{ total: true, cells: [
+              { val: 'Total' }, { val: '' },
+              { val: fmtNum(totalLiabilityOpen), num: true }, { val: fmtNum(lm.reduce(function(s,r){return s+r.new_contracts},0)), num: true },
+              { val: fmtNum(lm.reduce(function(s,r){return s+r.premiums_received},0)), num: true }, { val: fmtNum(lm.reduce(function(s,r){return s+r.claims_incurred},0)), num: true },
+              { val: fmtNum(lm.reduce(function(s,r){return s+r.csm_release},0)), num: true }, { val: fmtNum(lm.reduce(function(s,r){return s+r.experience_variance},0)), num: true },
+              { val: fmtNum(totalLiabilityClose), num: true }
+            ] }])
+          )
+        },
+        { id: 'csm', title: '2. Contractual service margin (CSM) reconciliation', desc: 'CSM from opening to closing: initial recognition, changes in estimates, release to P&L.',
+          body: table(
+            ['Portfolio', 'Cohort', 'Opening CSM', 'Initial recognition', 'Changes in estimates', 'CSM release to P&L', 'Closing CSM'],
+            cm.map(function(r) {
+              return { cells: [
+                { val: r.portfolio }, { val: r.cohort_year },
+                { val: fmtNum(r.opening_csm), num: true }, { val: fmtNum(r.initial_recognition), num: true },
+                { val: fmtNum(r.changes_in_estimates), num: true }, { val: fmtNum(r.csm_release_to_pl), num: true },
+                { val: fmtNum(r.closing_csm), num: true }
+              ] };
+            }).concat([{ total: true, cells: [
+              { val: 'Total' }, { val: '' },
+              { val: fmtNum(cm.reduce(function(s,r){return s+r.opening_csm},0)), num: true }, { val: fmtNum(cm.reduce(function(s,r){return s+r.initial_recognition},0)), num: true },
+              { val: fmtNum(cm.reduce(function(s,r){return s+r.changes_in_estimates},0)), num: true }, { val: fmtNum(totalCSMRelease), num: true },
+              { val: fmtNum(cm.reduce(function(s,r){return s+r.closing_csm},0)), num: true }
+            ] }])
+          ) + '<div class="summary-box">Total insurance revenue from CSM release in period: <strong>' + fmtNum(totalCSMRelease) + ' GHS</strong></div>'
+        },
+        { id: 'revenue-expense', title: '3. Insurance revenue and insurance service expense', desc: 'Amounts recognised in P&L: revenue (CSM release) and expenses (claims, acquisition).',
+          body: '<div class="summary-box"><strong>Insurance revenue (CSM release):</strong> ' + fmtNum(totalCSMRelease) + ' GHS</div>' +
+          '<div class="summary-box"><strong>Insurance service expense — Claims incurred:</strong> ' + fmtNum(totalIncurred) + ' GHS</div>' +
+          '<div class="summary-box"><strong>Insurance service expense — Acquisition costs (total):</strong> ' + fmtNum(totalAcq) + ' GHS</div>' +
+          table(
+            ['Contract', 'Commission', 'Underwriting', 'Total'],
+            ac.map(function(r) { return { cells: [ { val: r.contract_id }, { val: fmtNum(r.commission), num: true }, { val: fmtNum(r.underwriting_cost), num: true }, { val: fmtNum(r.total), num: true } ] }; })
+          )
+        },
+        { id: 'development', title: '4. Premium and claims development (run-off)', desc: 'Premium by contract; claims development triangle and loss emergence.',
+          body: '<h3 style="margin-top:0;font-size:1rem;">Premium by contract</h3>' +
+          table(
+            ['Contract', 'Period', 'Gross', 'Ceded', 'Net', 'Received date'],
+            prem.map(function(r) { return { cells: [ { val: r.contract_id }, { val: r.period }, { val: fmtNum(r.gross_premium), num: true }, { val: fmtNum(r.ceded_premium), num: true }, { val: fmtNum(r.net_premium), num: true }, { val: r.received_date } ] }; })
+          ) +
+          '<h3 style="font-size:1rem;">Claims development (incremental)</h3>' +
+          table(
+            ['Cohort', 'Dev. Y1', 'Dev. Y2', 'Dev. Y3', 'Incremental total'],
+            dev.map(function(r) { return { cells: [ { val: r.cohort_year }, { val: fmtNum(r.development_year_1), num: true }, { val: fmtNum(r.development_year_2), num: true }, { val: fmtNum(r.development_year_3), num: true }, { val: fmtNum(r.incremental_claims), num: true } ] }; })
+          )
+        },
+        { id: 'experience', title: '5. Experience variance and assumption change analysis', desc: 'Experience variance and changes in estimates by portfolio/cohort.',
+          body: table(
+            ['Portfolio', 'Cohort', 'Experience variance (liability)', 'Changes in estimates (CSM)'],
+            lm.map(function(r) {
+              var c = cm.find(function(x) { return x.portfolio === r.portfolio && x.cohort_year === r.cohort_year; });
+              return { cells: [ { val: r.portfolio }, { val: r.cohort_year }, { val: fmtNum(r.experience_variance), num: true }, { val: fmtNum(c ? c.changes_in_estimates : null), num: true } ] };
+            })
+          )
+        },
+        { id: 'reinsurance', title: '6. Reinsurance and net exposure', desc: 'Ceded premium, recoveries, reinsurance asset by contract.',
+          body: '<div class="summary-box">Total ceded premium (YTD): <strong>' + fmtNum(totalCededYtd) + ' GHS</strong> | Recoveries YTD: <strong>' + fmtNum(totalRecoveries) + ' GHS</strong> | Reinsurance asset: <strong>' + fmtNum(totalReinAsset) + ' GHS</strong></div>' +
+          table(
+            ['Contract', 'Reinsurer', 'Ceded premium YTD', 'Recoveries YTD', 'Reinsurance asset'],
+            rein.map(function(r) { return { cells: [ { val: r.contract_id }, { val: r.reinsurer }, { val: fmtNum(r.ceded_premium_ytd), num: true }, { val: fmtNum(r.recoveries_ytd), num: true }, { val: fmtNum(r.reinsurance_asset_balance), num: true } ] }; })
+          )
+        },
+        { id: 'concentration', title: '7. Concentration and mix', desc: 'Contract count and premium by portfolio and product.',
+          body: (function() {
+            var byPort = {};
+            contracts.forEach(function(c) {
+              byPort[c.portfolio] = (byPort[c.portfolio] || 0) + 1;
+            });
+            var rows = Object.keys(byPort).map(function(p) { return { cells: [ { val: p }, { val: byPort[p], num: true } ] }; });
+            return '<h3 style="margin-top:0;font-size:1rem;">Contract count by portfolio</h3>' + table(['Portfolio', 'Count'], rows) +
+            '<h3 style="font-size:1rem;">Premium by portfolio</h3>' +
+            table(
+              ['Portfolio', 'Gross premium', 'Ceded', 'Net'],
+              (function() {
+                var byP = {};
+                prem.forEach(function(r) {
+                  var p = contracts.find(function(c) { return c.contract_id === r.contract_id; });
+                  var port = p ? p.portfolio : 'Other';
+                  if (!byP[port]) byP[port] = { gross: 0, ceded: 0, net: 0 };
+                  byP[port].gross += r.gross_premium; byP[port].ceded += r.ceded_premium; byP[port].net += r.net_premium;
+                });
+                return Object.keys(byP).map(function(port) { return { cells: [ { val: port }, { val: fmtNum(byP[port].gross), num: true }, { val: fmtNum(byP[port].ceded), num: true }, { val: fmtNum(byP[port].net), num: true } ] }; });
+              })()
+            );
+          })()
+        },
+        { id: 'discount', title: '8. Discount rates and curve', desc: 'Yield curve as at reporting date for discounting fulfilment cash flows.',
+          body: table(
+            ['Term (years)', 'Rate %', 'As at date'],
+            disc.map(function(r) { return { cells: [ { val: r.term_years }, { val: fmtPct(r.rate_pct), num: true }, { val: r.as_at_date } ] }; })
+          )
+        },
+        { id: 'assumptions', title: '9. Assumptions summary (disclosure)', desc: 'Significant assumptions used in measurement for disclosure.',
+          body: table(
+            ['Portfolio', 'Assumption type', 'Value %', 'Effective date', 'Description'],
+            assump.map(function(r) { return { cells: [ { val: r.portfolio }, { val: r.assumption_type }, { val: fmtPct(r.value_pct), num: true }, { val: r.effective_date }, { val: r.description } ] }; })
+          )
+        },
+        { id: 'balances', title: '10. Statement of financial position extracts', desc: 'Insurance contract liabilities and reinsurance contract assets at reporting date.',
+          body: '<div class="summary-box"><strong>Insurance contract liabilities (total closing):</strong> ' + fmtNum(totalLiabilityClose) + ' GHS</div>' +
+          '<div class="summary-box"><strong>Reinsurance contract assets (total):</strong> ' + fmtNum(totalReinAsset) + ' GHS</div>' +
+          table(
+            ['Portfolio', 'Cohort', 'Closing liability'],
+            lm.map(function(r) { return { cells: [ { val: r.portfolio }, { val: r.cohort_year }, { val: fmtNum(r.closing_balance), num: true } ] }; }).concat([{ total: true, cells: [ { val: 'Total' }, { val: '' }, { val: fmtNum(totalLiabilityClose), num: true } ] }])
+          )
+        },
+        { id: 'new-business', title: '11. New business and cohort growth', desc: 'Contracts by cohort and portfolio; new business from liability movements.',
+          body: table(
+            ['Contract', 'Portfolio', 'Product', 'Cohort', 'Model', 'Inception', 'Coverage end'],
+            contracts.map(function(r) { return { cells: [ { val: r.contract_id }, { val: r.portfolio }, { val: r.product }, { val: r.cohort_year }, { val: r.measurement_model }, { val: r.inception_date }, { val: r.coverage_end_date } ] }; })
+          ) +
+          '<div class="summary-box">New contracts (liability) in period: Motor 2024 = 720, Property 2024 = 1,320. Initial CSM: Motor 2024 = 280, Property 2024 = 420.</div>'
+        },
+        { id: 'reserves', title: '12. Claims reserve and payment pattern', desc: 'Outstanding reserves and paid vs incurred by claim.',
+          body: '<div class="summary-box"><strong>Total incurred:</strong> ' + fmtNum(totalIncurred) + ' GHS | <strong>Total paid:</strong> ' + fmtNum(totalPaid) + ' GHS | <strong>Outstanding reserve:</strong> ' + fmtNum(totalOutstanding) + ' GHS</div>' +
+          table(
+            ['Contract', 'Claim', 'Incurred date', 'Incurred amount', 'Paid amount', 'Outstanding reserve'],
+            cl.map(function(r) { return { cells: [ { val: r.contract_id }, { val: r.claim_id }, { val: r.incurred_date || '—' }, { val: fmtNum(r.incurred_amount), num: true }, { val: fmtNum(r.paid_amount), num: true }, { val: fmtNum(r.outstanding_reserve), num: true } ] }; })
+          )
+        }
+      ];
+
+      var html = '';
+      sections.forEach(function(s) {
+        html += '<section id="' + s.id + '"><h2>' + s.title + '</h2><p class="desc">' + s.desc + '</p>' + s.body + '</section>';
+      });
+      document.getElementById('main').innerHTML = html;
+
+      if (typeof Chart !== 'undefined') {
+        if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+        var colors = { Motor: 'rgba(66, 133, 244, 0.8)', Property: 'rgba(52, 168, 83, 0.8)', Life: 'rgba(251, 188, 5, 0.8)' };
+        var ports = ['Motor', 'Property', 'Life'];
+        var piePctPlugin = { datalabels: { color: '#fff', font: { weight: 'bold', size: 12 }, formatter: function(value, ctx) { var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0); return total ? (value / total * 100).toFixed(1) + '%' : ''; } } };
+        var piePremium = document.getElementById('chart-pie-premium');
+        if (piePremium) new Chart(piePremium.getContext('2d'), { type: 'doughnut', data: { labels: ports, datasets: [{ data: ports.map(function(p) { return byPortfolio[p].premium; }), backgroundColor: ports.map(function(p) { return colors[p]; }) }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, datalabels: piePctPlugin.datalabels } } });
+        var pieLiability = document.getElementById('chart-pie-liability');
+        if (pieLiability) new Chart(pieLiability.getContext('2d'), { type: 'doughnut', data: { labels: ports, datasets: [{ data: ports.map(function(p) { return byPortfolio[p].liability; }), backgroundColor: ports.map(function(p) { return colors[p]; }) }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, datalabels: piePctPlugin.datalabels } } });
+        var barPremiumClaims = document.getElementById('chart-bar-premium-claims');
+        if (barPremiumClaims) new Chart(barPremiumClaims.getContext('2d'), { type: 'bar', data: { labels: ports, datasets: [{ label: 'Gross premium', data: ports.map(function(p) { return byPortfolio[p].premium; }), backgroundColor: 'rgba(66, 133, 244, 0.7)' }, { label: 'Claims incurred', data: ports.map(function(p) { return byPortfolio[p].claims; }), backgroundColor: 'rgba(234, 67, 53, 0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, beginAtZero: true } }, plugins: { legend: { position: 'top' } } } });
+        var barOpeningClosing = document.getElementById('chart-bar-opening-closing');
+        if (barOpeningClosing) new Chart(barOpeningClosing.getContext('2d'), { type: 'bar', data: { labels: ports, datasets: [{ label: 'Opening liability', data: ports.map(function(p) { return byPortfolio[p].opening; }), backgroundColor: 'rgba(158, 158, 158, 0.7)' }, { label: 'Closing liability', data: ports.map(function(p) { return byPortfolio[p].liability; }), backgroundColor: 'rgba(52, 168, 83, 0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, beginAtZero: true } }, plugins: { legend: { position: 'top' } } } });
+        var cohortLabels = ['2022', '2023', '2024'];
+        var lineLiability = document.getElementById('chart-line-liability-trend');
+        if (lineLiability) new Chart(lineLiability.getContext('2d'), { type: 'line', data: { labels: cohortLabels, datasets: [{ label: 'Closing liability (GHS)', data: liabilityByCohort, borderColor: 'rgb(66, 133, 244)', backgroundColor: 'rgba(66, 133, 244, 0.1)', fill: true, tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, beginAtZero: true } }, plugins: { legend: { position: 'top' }, datalabels: { anchor: 'end', align: 'top', color: 'rgb(66, 133, 244)', font: { size: 11, weight: 'bold' }, formatter: function(value) { return typeof value === 'number' ? value.toLocaleString() : value; } } } } });
+        var lineCsm = document.getElementById('chart-line-csm-trend');
+        if (lineCsm) new Chart(lineCsm.getContext('2d'), { type: 'line', data: { labels: cohortLabels, datasets: [{ label: 'Closing CSM (GHS)', data: csmByCohort, borderColor: 'rgb(52, 168, 83)', backgroundColor: 'rgba(52, 168, 83, 0.1)', fill: true, tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, beginAtZero: true } }, plugins: { legend: { position: 'top' }, datalabels: { anchor: 'end', align: 'top', color: 'rgb(52, 168, 83)', font: { size: 11, weight: 'bold' }, formatter: function(value) { return typeof value === 'number' ? value.toLocaleString() : value; } } } } });
+      }
+    })();
+  </script>
+</body>
+</html>

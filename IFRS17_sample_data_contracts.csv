@@ -1,0 +1,8 @@
+contract_id,portfolio,product,inception_date,coverage_end_date,measurement_model,cohort_year,currency
+MTR-2023-001,Motor,Motor Comprehensive,2023-01-15,2024-01-14,PAA,2023,USD
+MTR-2023-002,Motor,Motor Third Party,2023-06-01,2024-05-31,PAA,2023,USD
+MTR-2024-001,Motor,Motor Comprehensive,2024-03-01,2025-02-28,PAA,2024,USD
+PRP-2023-001,Property,Fire and Theft,2023-04-01,2024-03-31,PAA,2023,USD
+PRP-2024-001,Property,Fire and Theft,2024-07-01,2025-06-30,PAA,2024,USD
+LIF-2022-001,Life,Term Life,2022-01-01,2032-12-31,GMM,2022,USD
+LIF-2023-001,Life,Term Life,2023-01-01,2033-12-31,GMM,2023,USD

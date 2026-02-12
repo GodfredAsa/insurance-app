@@ -1,0 +1,7 @@
+portfolio,assumption_type,value_pct,effective_date,description
+Motor,lapse_rate,8,2024-01-01,Annual policy lapse rate
+Motor,claim_inflation,5,2024-01-01,Expected claims inflation
+Property,lapse_rate,6,2024-01-01,Annual policy lapse rate
+Property,claim_inflation,4,2024-01-01,Expected claims inflation
+Life,mortality_rate_base,0.12,2024-01-01,Base mortality per 1000
+Life,lapse_rate,4,2024-01-01,Annual lapse rate

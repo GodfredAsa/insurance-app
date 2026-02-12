@@ -1,0 +1,6 @@
+contract_id,reinsurer,ceded_premium_ytd,recoveries_ytd,reinsurance_asset_balance
+MTR-2023-001,Reinsurer A,180,0,45
+MTR-2023-002,Reinsurer A,60,0,15
+MTR-2024-001,Reinsurer A,200,0,80
+PRP-2023-001,Reinsurer B,360,2125,0
+PRP-2024-001,Reinsurer B,390,0,800
