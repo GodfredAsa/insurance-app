@@ -60,11 +60,19 @@ export class AppComponent {
     avatarUrl: 'https://ui-avatars.com/api/?name=Mike&background=dcfce7&color=16a34a',
   });
   navItems = signal<NavItemConfig[]>([
-    { icon: 'fa-th-large', label: 'Overview', link: '/dashboard' },
-    { icon: 'fa-box-open', label: 'Orders', link: '/orders' },
-    { icon: 'fa-envelope', label: 'Messages', link: '/messages' },
-    { icon: 'fa-chart-bar', label: 'Statistics', link: '/statistics' },
-    { icon: 'fa-user', label: 'Profile', link: '/profile' },
+    { icon: 'fa-chart-pie', label: 'Summary & charts', link: '/dashboard' },
+    { icon: 'fa-balance-scale', label: 'Liability reconciliation', link: '/dashboard/liability' },
+    { icon: 'fa-coins', label: 'CSM reconciliation', link: '/dashboard/csm' },
+    { icon: 'fa-file-invoice-dollar', label: 'Revenue & expense', link: '/dashboard/revenue-expense' },
+    { icon: 'fa-chart-line', label: 'Premium & claims development', link: '/dashboard/development' },
+    { icon: 'fa-calculator', label: 'Experience & assumptions', link: '/dashboard/experience' },
+    { icon: 'fa-shield-alt', label: 'Reinsurance', link: '/dashboard/reinsurance' },
+    { icon: 'fa-layer-group', label: 'Concentration & mix', link: '/dashboard/concentration' },
+    { icon: 'fa-percent', label: 'Discount rates', link: '/dashboard/discount' },
+    { icon: 'fa-sliders-h', label: 'Assumptions', link: '/dashboard/assumptions' },
+    { icon: 'fa-wallet', label: 'Balances', link: '/dashboard/balances' },
+    { icon: 'fa-briefcase', label: 'New business', link: '/dashboard/new-business' },
+    { icon: 'fa-ambulance', label: 'Claims reserves', link: '/dashboard/reserves' },
   ]);
   supportItems = signal<NavItemConfig[]>([
     { icon: 'fa-cog', label: 'Settings', link: '/settings' },

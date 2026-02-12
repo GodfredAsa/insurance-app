@@ -1,6 +1,9 @@
 # Insurance API (FastAPI)
 
-Backend for the insurance project. REST API with user management, registration, and JWT authentication. Data is stored in SQLite (`db/data.db`).
+Backend for the insurance project. REST API with:
+
+- **User management** — registration, JWT authentication. Data is stored in SQLite (`db/data.db`).
+- **IFRS 17 reporting** — dashboard metrics, liability/CSM reconciliations, and raw data. Reads from a JSON file in the project root (no DB). No auth required for IFRS 17 endpoints.
 
 This README helps you **understand and navigate the codebase** and **contribute** from scratch.
 
@@ -16,6 +19,7 @@ This README helps you **understand and navigate the codebase** and **contribute*
 - [Request flow](#request-flow)
 - [Key concepts](#key-concepts)
 - [API reference](#api-reference)
+- [IFRS 17 API](#ifrs-17-api)
 - [Database](#database)
 - [Authentication](#authentication)
 - [Configuration](#configuration)
@@ -58,6 +62,8 @@ uvicorn main:app --reload
 
 **Important:** Run uvicorn from inside the `api-server` directory. Use `main:app`, not `app.main:app` (there is no `app` package).
 
+**IFRS 17 data:** The IFRS 17 endpoints read from `ifrs17_sample_data.json` in the **project root** (parent of `api-server`). Ensure that file exists there, or the IFRS 17 routes will return 503.
+
 ---
 
 ## Project structure
@@ -72,21 +78,25 @@ api-server/
 ├── api/                    # VIEW layer — HTTP routes only
 │   └── v1/
 │       ├── user_view.py    # User CRUD: list, get by id, create
-│       └── auth_view.py    # Auth: register, login
+│       ├── auth_view.py    # Auth: register, login
+│       └── ifrs17_view.py   # IFRS 17: metadata, dashboard, reconciliations, data (no auth)
 │
 ├── presenters/             # PRESENTER layer — coordinates view and service; shapes responses
 │   ├── user_presenter.py   # User responses (domain → UserResponse)
 │   └── auth_presenter.py   # Register/login (calls service + JWT)
 │
-├── services/               # Business logic; talks to DB
-│   └── user_service.py     # User CRUD, auth, default admin; uses SQLAlchemy sessions
+├── services/               # Business logic; talks to DB or file
+│   ├── user_service.py     # User CRUD, auth, default admin; uses SQLAlchemy sessions
+│   ├── ifrs17_data.py      # Load/cache ifrs17_sample_data.json from project root
+│   └── ifrs17_engine.py    # IFRS 17 aggregations, reconciliations, dashboard metrics
 │
 ├── models/                 # MODEL layer
 │   ├── user_model.py       # Domain model: User dataclass + Role enum (used in services)
 │   └── db_models.py        # SQLAlchemy table: UserTable (users table)
 │
 ├── schemas/                # Pydantic request/response shapes (API contract)
-│   └── user_schema.py      # UserCreate, UserResponse, LoginRequest, TokenResponse
+│   ├── user_schema.py      # UserCreate, UserResponse, LoginRequest, TokenResponse
+│   └── ifrs17_schema.py    # IFRS 17 response shapes (Metadata, reconciliation rows)
 │
 ├── auth/                   # Auth utilities (no routes)
 │   └── jwt.py              # create_access_token(); SECRET_KEY, expiry
@@ -166,8 +176,8 @@ Same idea for **POST /api/v1/users** (create), **GET /api/v1/users/{id}**, **POS
 
 ## API reference
 
-**Public (no token):** only `POST /api/v1/register` and `POST /api/v1/login`.  
-**All other endpoints** require a valid JWT in the header: `Authorization: Bearer <access_token>`.
+**Public (no token):** `POST /api/v1/register`, `POST /api/v1/login`, and **all `/api/v1/ifrs17/*`** endpoints.  
+**Protected (JWT required):** `/`, `/health`, `/api/v1/users` and `/api/v1/users/{id}`. Use header: `Authorization: Bearer <access_token>`.
 
 | Method | URL | Auth | Description |
 |--------|-----|------|-------------|
@@ -181,7 +191,36 @@ Same idea for **POST /api/v1/users** (create), **GET /api/v1/users/{id}**, **POS
 
 Default admin (created on startup): **admin@admin.com** / **1234**.
 
-**Quick test with admin:**
+---
+
+## IFRS 17 API
+
+IFRS 17 endpoints are **public** (no JWT required). They serve dashboard summaries, liability/CSM reconciliations, and raw data for the IFRS 17 report (see project root `IFRS17_SYSTEM_BUILD_PLAN.md` and `index.html`).
+
+**Data source:** The server reads from **`ifrs17_sample_data.json`** in the **project root** (the directory that contains `api-server/`). The path is resolved from `api-server/services/ifrs17_data.py` as `../ifrs17_sample_data.json`. If the file is missing, all IFRS 17 routes return **503** with a detail message.
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/api/v1/ifrs17/metadata` | Reporting date, currency, portfolios |
+| GET | `/api/v1/ifrs17/dashboard/summary` | Totals, trend %, by_portfolio (for cards and charts) |
+| GET | `/api/v1/ifrs17/dashboard` | Combined: summary + liability trend + CSM trend + portfolio comparison |
+| GET | `/api/v1/ifrs17/dashboard/liability-trend` | Labels and values for liability-by-cohort line chart |
+| GET | `/api/v1/ifrs17/dashboard/csm-trend` | Labels and values for CSM-by-cohort line chart |
+| GET | `/api/v1/ifrs17/dashboard/portfolio-comparison` | Table: portfolio, contracts, premium, claims, loss %, liability, CSM |
+| GET | `/api/v1/ifrs17/reconciliations/liability` | Liability reconciliation rows + totals |
+| GET | `/api/v1/ifrs17/reconciliations/csm` | CSM reconciliation rows + totals + insurance revenue from CSM release |
+| GET | `/api/v1/ifrs17/data` | Raw data. Optional: `?portfolio=Motor` or `?cohort_year=2024` |
+
+**Quick test (no token):**
+
+```bash
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/metadata
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/dashboard/summary
+```
+
+---
+
+**Quick test with admin (users):**
 
 ```bash
 # 1. Login as admin → get access_token
@@ -223,6 +262,8 @@ curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" http://127.0.0.1:8000/api/v1/u
 | `SQL_ECHO` | Log SQL (1/true to enable) | off |
 
 Use a strong `SECRET_KEY` in production.
+
+**IFRS 17:** Data file path is fixed: project root `ifrs17_sample_data.json`. To use another path you would need to change `services/ifrs17_data.py` (e.g. env var or config).
 
 ---
 

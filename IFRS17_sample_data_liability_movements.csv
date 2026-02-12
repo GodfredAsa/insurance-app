@@ -1,0 +1,7 @@
+portfolio,cohort_year,opening_balance,new_contracts,premiums_received,claims_incurred,csm_release,experience_variance,closing_balance
+Motor,2023,420,0,-380,200,-180,15,275
+Motor,2024,0,720,-350,0,-120,0,250
+Property,2023,980,0,-510,0,-350,-20,100
+Property,2024,0,1320,-440,800,-200,0,480
+Life,2022,4200,0,-500,0,280,50,4030
+Life,2023,3800,0,-550,0,320,-30,3540

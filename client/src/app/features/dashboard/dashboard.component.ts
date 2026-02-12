@@ -1,190 +1,195 @@
 import { NgClass } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { BarChartComponent } from '../../shared/components/bar-chart/bar-chart.component';
-import { CardComponent } from '../../shared/components/card/card.component';
 import { DonutChartComponent } from '../../shared/components/donut-chart/donut-chart.component';
 import { LineChartComponent } from '../../shared/components/line-chart/line-chart.component';
-import { BarChartItem, DonutChartItem, LineSeries } from '../../shared/models/chart.model';
+import { BarSeries, DonutChartItem, LineSeries } from '../../shared/models/chart.model';
+import { IFRS17_STATIC_DATA } from './ifrs17-static-data';
+
+const CHART_COLORS: Record<string, string> = {
+  Motor: 'rgba(66, 133, 244, 0.8)',
+  Property: 'rgba(52, 168, 83, 0.8)',
+  Life: 'rgba(251, 188, 5, 0.8)',
+};
+
+function fmtNum(n: number | null | undefined): string {
+  if (n == null) return '—';
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function fmtPct(n: number | null | undefined): string {
+  if (n == null) return '—';
+  return Number(n) + '%';
+}
+
+interface ByPortfolio {
+  premium: number;
+  claims: number;
+  liability: number;
+  csm: number;
+  count: number;
+  opening: number;
+}
+
+interface PortfolioComparisonRow {
+  portfolio: string;
+  contracts: number;
+  gross_premium: number;
+  claims: number;
+  loss_ratio_pct: string;
+  closing_liability: number;
+  closing_csm: number;
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NgClass, BarChartComponent, CardComponent, DonutChartComponent, LineChartComponent],
-  template: `
-    <div class="p-6 space-y-6">
-      <div class="flex flex-wrap items-center gap-3">
-        <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
-          <i class="fas fa-filter text-gray-500"></i>
-          Filters
-        </button>
-        <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
-          <i class="fas fa-calendar-alt text-gray-500"></i>
-          Last 30 days
-          <i class="fas fa-chevron-down text-xs text-gray-400"></i>
-        </button>
-        <button type="button" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700">
-          <i class="fas fa-file-export"></i>
-          Export PDF
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        @for (stat of statCards; track stat.title) {
-          <app-card
-            [title]="stat.title"
-            [icon]="stat.icon"
-            [value]="stat.value"
-            [valueSubtext]="stat.valueSubtext"
-            [iconBg]="stat.iconBg"
-            [trendDown]="stat.trendDown"
-            [statCard]="true"
-          />
-        }
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <app-card>
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Statistics</h2>
-            <a href="#" class="text-sm font-medium text-green-600 hover:text-green-700">more &gt;</a>
-          </div>
-          <app-donut-chart
-            [data]="donutData"
-            [chartHeight]="260"
-            centerTitle="Total orders"
-            centerValue="857"
-          />
-        </app-card>
-        <app-card>
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Orders history</h2>
-            <a href="#" class="text-sm font-medium text-green-600 hover:text-green-700">more &gt;</a>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="text-left text-gray-500 border-b border-gray-200">
-                  <th class="pb-3 font-medium">Order number</th>
-                  <th class="pb-3 font-medium">Status</th>
-                  <th class="pb-3 font-medium">Date and Time</th>
-                  <th class="pb-3 font-medium">Amount</th>
-                  <th class="pb-3 font-medium w-10"></th>
-                </tr>
-              </thead>
-              <tbody class="text-gray-700">
-                @for (row of ordersHistory; track row.orderNumber) {
-                  <tr class="border-b border-gray-100 hover:bg-gray-50/50">
-                    <td class="py-3 font-medium">{{ row.orderNumber }}</td>
-                    <td class="py-3">
-                      <span class="inline-flex items-center gap-1.5" [ngClass]="row.statusClass">
-                        <i class="fas text-xs" [ngClass]="row.statusIcon"></i>
-                        {{ row.status }}
-                      </span>
-                    </td>
-                    <td class="py-3">{{ row.dateTime }}</td>
-                    <td class="py-3">{{ row.amount }}</td>
-                    <td class="py-3">
-                      <button type="button" class="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-ellipsis-v"></i>
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </app-card>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <app-card>
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Insurance contribution trend</h2>
-            <a href="#" class="text-sm font-medium text-green-600 hover:text-green-700">more &gt;</a>
-          </div>
-          <app-line-chart
-            [series]="insuranceContributionTrend"
-            [xLabels]="contributionMonths"
-            height="280px"
-          />
-        </app-card>
-        <app-card>
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Monthly contribution</h2>
-            <a href="#" class="text-sm font-medium text-green-600 hover:text-green-700">more &gt;</a>
-          </div>
-          <app-bar-chart
-            [data]="monthlyContributionBars"
-            height="280px"
-          />
-        </app-card>
-      </div>
-    </div>
-  `,
-  styles: [],
+  imports: [NgClass, BarChartComponent, DonutChartComponent, LineChartComponent],
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent {
-  statCards = [
-    {
-      title: 'Monthly Delivery',
-      value: '857 orders',
-      valueSubtext: '-10% vs past month',
-      icon: 'fa-truck',
-      iconBg: 'green' as const,
-      trendDown: true,
-    },
-    {
-      title: 'Monthly work hours',
-      value: '158 hours',
-      valueSubtext: '+20% vs past month',
-      icon: 'fa-calendar-alt',
-      iconBg: 'orange' as const,
-      trendDown: false,
-    },
-    {
-      title: 'Earned funds',
-      value: '1,5k $',
-      valueSubtext: '+5% vs past month',
-      icon: 'fa-dollar-sign',
-      iconBg: 'green' as const,
-      trendDown: false,
-    },
-  ];
+export class DashboardComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  /** Which section to show (one page per section). From route data. */
+  readonly currentSection = signal<string>('summary');
 
-  donutData: DonutChartItem[] = [
-    { label: 'Central area', value: 52, color: '#22C55E' },
-    { label: 'South-Western area', value: 15, color: '#86EFAC' },
-    { label: 'Eastern area', value: 33, color: '#F97316' },
-  ];
+  readonly data = IFRS17_STATIC_DATA;
 
-  contributionMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  insuranceContributionTrend: LineSeries[] = [
-    {
-      name: 'Contribution',
-      data: [420, 445, 438, 460, 472, 488, 495, 510, 518, 532, 540, 558],
-      color: '#22C55E',
-    },
-  ];
-  monthlyContributionBars: BarChartItem[] = [
-    { label: 'Jan', value: 420 },
-    { label: 'Feb', value: 445 },
-    { label: 'Mar', value: 438 },
-    { label: 'Apr', value: 460 },
-    { label: 'May', value: 472 },
-    { label: 'Jun', value: 488 },
-    { label: 'Jul', value: 495 },
-    { label: 'Aug', value: 510 },
-    { label: 'Sep', value: 518 },
-    { label: 'Oct', value: 532 },
-    { label: 'Nov', value: 540 },
-    { label: 'Dec', value: 558 },
-  ];
+  ngOnInit(): void {
+    this.route.data.subscribe((d) => {
+      this.currentSection.set((d['section'] as string) ?? 'summary');
+    });
+  }
+  readonly currency = this.data.metadata.currency;
+  readonly reportingDate = this.data.metadata.reporting_date;
+  readonly portfolios = [...this.data.metadata.portfolios];
 
-  ordersHistory = [
-    { orderNumber: '#12345678', status: 'Completed', statusClass: 'text-green-600', statusIcon: 'fa-check-circle', dateTime: '1/10/2024 at 5:12 PM', amount: '$ 32,85' },
-    { orderNumber: '#12345679', status: 'Pending', statusClass: 'text-amber-600', statusIcon: 'fa-clock', dateTime: '1/10/2024 at 4:32 PM', amount: '$ 18,50' },
-    { orderNumber: '#12345680', status: 'Failed', statusClass: 'text-red-600', statusIcon: 'fa-times-circle', dateTime: '1/10/2024 at 3:45 PM', amount: '$ 42,00' },
-    { orderNumber: '#12345681', status: 'Completed', statusClass: 'text-green-600', statusIcon: 'fa-check-circle', dateTime: '1/10/2024 at 2:20 PM', amount: '$ 25,30' },
-    { orderNumber: '#12345682', status: 'Pending', statusClass: 'text-amber-600', statusIcon: 'fa-clock', dateTime: '1/10/2024 at 1:15 PM', amount: '$ 67,90' },
+  readonly lm = this.data.liability_movements;
+  readonly cm = this.data.csm_movements;
+  readonly prem = this.data.premiums;
+  readonly cl = this.data.claims;
+  readonly ac = this.data.acquisition_costs;
+  readonly rein = this.data.reinsurance;
+  readonly contracts = this.data.contracts;
+  readonly assump = this.data.assumptions;
+  readonly disc = this.data.discount_rates;
+  readonly dev = this.data.claims_development;
+
+  /** Totals (same logic as index.html) */
+  readonly totalLiabilityClose = this.lm.reduce((s, r) => s + r.closing_balance, 0);
+  readonly totalLiabilityOpen = this.lm.reduce((s, r) => s + r.opening_balance, 0);
+  readonly totalCSMClose = this.cm.reduce((s, r) => s + r.closing_csm, 0);
+  readonly totalCSMOpen = this.cm.reduce((s, r) => s + r.opening_csm, 0);
+  readonly totalCSMRelease = this.cm.reduce((s, r) => s + (r.csm_release_to_pl ?? 0), 0);
+  readonly totalGross = this.prem.reduce((s, r) => s + r.gross_premium, 0);
+  readonly totalNet = this.prem.reduce((s, r) => s + r.net_premium, 0);
+  readonly totalIncurred = this.cl.reduce((s, r) => s + r.incurred_amount, 0);
+  readonly totalPaid = this.cl.reduce((s, r) => s + (r.paid_amount ?? 0), 0);
+  readonly totalOutstanding = this.cl.reduce((s, r) => s + (r.outstanding_reserve ?? 0), 0);
+  readonly totalAcq = this.ac.reduce((s, r) => s + r.total, 0);
+  readonly totalReinAsset = this.rein.reduce((s, r) => s + r.reinsurance_asset_balance, 0);
+  readonly totalCededYtd = this.rein.reduce((s, r) => s + r.ceded_premium_ytd, 0);
+  readonly totalRecoveries = this.rein.reduce((s, r) => s + r.recoveries_ytd, 0);
+  readonly contractsCount = this.contracts.length;
+
+  readonly lossRatioPct = this.totalNet ? ((this.totalIncurred / this.totalNet) * 100).toFixed(1) : '—';
+  readonly liabilityTrendPct = this.totalLiabilityOpen ? ((this.totalLiabilityClose - this.totalLiabilityOpen) / this.totalLiabilityOpen) * 100 : null;
+  readonly csmTrendPct = this.totalCSMOpen ? ((this.totalCSMClose - this.totalCSMOpen) / this.totalCSMOpen) * 100 : null;
+
+  /** byPortfolio: Motor, Property, Life with premium, claims, liability, csm, count, opening */
+  readonly byPortfolio: Record<string, ByPortfolio> = (() => {
+    const ports = this.portfolios;
+    const out: Record<string, ByPortfolio> = {};
+    ports.forEach((p) => { out[p] = { premium: 0, claims: 0, liability: 0, csm: 0, count: 0, opening: 0 }; });
+    this.contracts.forEach((c) => { out[c.portfolio].count++; });
+    const contractById = new Map(this.contracts.map((c) => [c.contract_id, c]));
+    this.prem.forEach((r) => {
+      const c = contractById.get(r.contract_id);
+      if (c && out[c.portfolio]) out[c.portfolio].premium += r.gross_premium;
+    });
+    this.cl.forEach((r) => {
+      const c = contractById.get(r.contract_id);
+      if (c && out[c.portfolio]) out[c.portfolio].claims += r.incurred_amount;
+    });
+    this.lm.forEach((r) => {
+      if (out[r.portfolio]) { out[r.portfolio].liability += r.closing_balance; out[r.portfolio].opening += r.opening_balance; }
+    });
+    this.cm.forEach((r) => {
+      if (out[r.portfolio]) out[r.portfolio].csm += r.closing_csm;
+    });
+    return out;
+  })();
+
+  /** Liability by cohort year [2022, 2023, 2024] */
+  readonly liabilityByCohort = [2022, 2023, 2024].map((y) => this.lm.filter((r) => r.cohort_year === y).reduce((s, r) => s + r.closing_balance, 0));
+  /** CSM by cohort year */
+  readonly csmByCohort = [2022, 2023, 2024].map((y) => this.cm.filter((r) => r.cohort_year === y).reduce((s, r) => s + r.closing_csm, 0));
+  readonly cohortLabels = ['2022', '2023', '2024'];
+
+  /** Portfolio comparison table rows */
+  readonly portfolioComparison: PortfolioComparisonRow[] = this.portfolios.map((port) => {
+    const x = this.byPortfolio[port];
+    const lossPct = x.premium ? ((x.claims / x.premium) * 100).toFixed(1) : '—';
+    return {
+      portfolio: port,
+      contracts: x.count,
+      gross_premium: x.premium,
+      claims: x.claims,
+      loss_ratio_pct: lossPct + '%',
+      closing_liability: x.liability,
+      closing_csm: x.csm,
+    };
+  });
+
+  /** Chart data */
+  donutPremiumData: DonutChartItem[] = this.portfolios.map((p) => ({
+    label: p,
+    value: this.byPortfolio[p].premium,
+    color: CHART_COLORS[p] ?? '#94a3b8',
+  }));
+  donutLiabilityData: DonutChartItem[] = this.portfolios.map((p) => ({
+    label: p,
+    value: this.byPortfolio[p].liability,
+    color: CHART_COLORS[p] ?? '#94a3b8',
+  }));
+  barPremiumClaimsSeries: BarSeries[] = [
+    { name: 'Gross premium', data: this.portfolios.map((p) => this.byPortfolio[p].premium), color: 'rgba(66, 133, 244, 0.7)' },
+    { name: 'Claims incurred', data: this.portfolios.map((p) => this.byPortfolio[p].claims), color: 'rgba(234, 67, 53, 0.7)' },
   ];
+  barOpeningClosingSeries: BarSeries[] = [
+    { name: 'Opening liability', data: this.portfolios.map((p) => this.byPortfolio[p].opening), color: 'rgba(158, 158, 158, 0.7)' },
+    { name: 'Closing liability', data: this.portfolios.map((p) => this.byPortfolio[p].liability), color: 'rgba(52, 168, 83, 0.7)' },
+  ];
+  lineLiabilitySeries: LineSeries[] = [{ name: 'Closing liability', data: this.liabilityByCohort, color: 'rgb(66, 133, 244)' }];
+  lineCsmSeries: LineSeries[] = [{ name: 'Closing CSM', data: this.csmByCohort, color: 'rgb(52, 168, 83)' }];
+
+  readonly fmtNum = fmtNum;
+  readonly fmtPct = fmtPct;
+
+  trendText(pct: number | null): string {
+    if (pct == null) return '';
+    const up = pct >= 0;
+    return (up ? '↑ ' : '↓ ') + Math.abs(pct).toFixed(1) + '% vs opening';
+  }
+
+  /** CSM reconciliation totals row */
+  readonly csmTotals = {
+    opening_csm: IFRS17_STATIC_DATA.csm_movements.reduce((s, r) => s + r.opening_csm, 0),
+    initial_recognition: IFRS17_STATIC_DATA.csm_movements.reduce((s, r) => s + r.initial_recognition, 0),
+    changes_in_estimates: IFRS17_STATIC_DATA.csm_movements.reduce((s, r) => s + r.changes_in_estimates, 0),
+  };
+
+  /** Liability reconciliation totals row */
+  readonly liabilityTotals = {
+    new_contracts: IFRS17_STATIC_DATA.liability_movements.reduce((s, r) => s + r.new_contracts, 0),
+    premiums_received: IFRS17_STATIC_DATA.liability_movements.reduce((s, r) => s + r.premiums_received, 0),
+    claims_incurred: IFRS17_STATIC_DATA.liability_movements.reduce((s, r) => s + r.claims_incurred, 0),
+    csm_release: IFRS17_STATIC_DATA.liability_movements.reduce((s, r) => s + r.csm_release, 0),
+    experience_variance: IFRS17_STATIC_DATA.liability_movements.reduce((s, r) => s + r.experience_variance, 0),
+  };
+
+  getCsmChangesInEstimates(portfolio: string, cohortYear: number): number | null {
+    const row = this.cm.find((c) => c.portfolio === portfolio && c.cohort_year === cohortYear);
+    return row?.changes_in_estimates ?? null;
+  }
 }
