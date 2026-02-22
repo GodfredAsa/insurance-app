@@ -62,7 +62,16 @@
             </p>
           }
         </div>
-        <button type="submit" class="btn-primary">Create Account</button>
+        @if (errorMessage) {
+          <p class="form-error form-error-server">{{ errorMessage }}</p>
+        }
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          @if (loading) {
+            <span class="btn-loader"><i class="fas fa-spinner fa-spin"></i> Creating account...</span>
+          } @else {
+            Create Account
+          }
+        </button>
         <button type="button" class="btn-secondary" routerLink="/login">Sign in</button>
       </form>
 

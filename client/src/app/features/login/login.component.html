@@ -37,28 +37,32 @@
         <div class="form-group">
           <div class="input-wrap">
             <input
-              [type]="pinVisible ? 'text' : 'password'"
-              formControlName="pin"
+              [type]="passwordVisible ? 'text' : 'password'"
+              formControlName="password"
               class="form-input"
-              placeholder="Pin (4 digits)"
-              autocomplete="off"
-              inputmode="numeric"
-              maxlength="4"
-              (input)="onPinInput($event)"
+              placeholder="Password"
+              autocomplete="current-password"
             />
-            <button type="button" class="pin-toggle" (click)="pinVisible = !pinVisible" tabindex="-1" title="Toggle visibility">
-              <i class="fas" [ngClass]="pinVisible ? 'fa-eye-slash' : 'fa-eye'"></i>
+            <button type="button" class="pin-toggle" (click)="passwordVisible = !passwordVisible" tabindex="-1" title="Toggle visibility">
+              <i class="fas" [ngClass]="passwordVisible ? 'fa-eye-slash' : 'fa-eye'"></i>
             </button>
           </div>
-          @if (pin?.invalid && pin?.touched) {
+          @if (password?.invalid && password?.touched) {
             <p class="form-error">
-              @if (pin?.errors?.['required']) { Pin is required. }
-              @if (pin?.errors?.['minlength'] || pin?.errors?.['maxLength']) { Pin must be 4 digits. }
-              @if (pin?.errors?.['pinFormat']) { Pin must be exactly 4 numbers. }
+              @if (password?.errors?.['required']) { Password is required. }
             </p>
           }
         </div>
-        <button type="submit" class="btn-login">Log in</button>
+        @if (errorMessage) {
+          <p class="form-error form-error-server">{{ errorMessage }}</p>
+        }
+        <button type="submit" class="btn-login" [disabled]="loading">
+          @if (loading) {
+            <span class="btn-loader"><i class="fas fa-spinner fa-spin"></i> Signing in...</span>
+          } @else {
+            Log in
+          }
+        </button>
       </form>
 
         <p class="login-footer">

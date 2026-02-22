@@ -217,6 +217,21 @@
   transform: scale(0.99);
 }
 
+.btn-login:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.btn-login .btn-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-error-server {
+  margin-top: 0.25rem;
+}
+
 .login-footer {
   margin: 1.5rem 0 0;
   font-size: 0.9rem;

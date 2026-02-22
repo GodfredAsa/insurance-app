@@ -150,6 +150,21 @@
   transform: scale(0.99);
 }
 
+.btn-primary:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.btn-primary .btn-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-error-server {
+  margin-top: 0.25rem;
+}
+
 .btn-secondary {
   width: 100%;
   padding: 0.875rem 1rem;
