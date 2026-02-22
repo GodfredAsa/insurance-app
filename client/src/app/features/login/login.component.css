@@ -201,7 +201,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
-  background: #16a34a;
+  background: #1a365d;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -210,7 +210,7 @@
 }
 
 .btn-login:hover {
-  background: #15803d;
+  background: #2d4a7c;
 }
 
 .btn-login:active {
