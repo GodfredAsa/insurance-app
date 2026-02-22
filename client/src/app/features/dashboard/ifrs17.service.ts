@@ -117,6 +117,30 @@ export class Ifrs17Service {
     );
   }
 
+  getSummary(): Observable<Ifrs17DashboardSummary | null> {
+    return this.http.get<Ifrs17DashboardSummary>(`${BASE}/summary`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
+  getLiabilityTrend(): Observable<Ifrs17Trend | null> {
+    return this.http.get<Ifrs17Trend>(`${BASE}/liability-trend`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
+  getCsmTrend(): Observable<Ifrs17Trend | null> {
+    return this.http.get<Ifrs17Trend>(`${BASE}/csm-trend`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
+  getPortfolioComparison(): Observable<Ifrs17PortfolioComparisonRow[] | null> {
+    return this.http.get<Ifrs17PortfolioComparisonRow[]>(`${BASE}/portfolio-comparison`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
   getReconciliationLiability(): Observable<Ifrs17LiabilityReconciliation | null> {
     return this.http.get<Ifrs17LiabilityReconciliation>(`${BASE}/reconciliations/liability`).pipe(
       catchError(() => of(null))

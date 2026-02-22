@@ -1,7 +1,8 @@
 import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -12,40 +13,43 @@ import { Router, RouterLink } from '@angular/router';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  pinVisible = false;
+  passwordVisible = false;
+  loading = false;
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private auth: AuthService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      pin: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(4), this.pinNumericValidator]],
+      password: ['', [Validators.required, Validators.minLength(1)]],
     });
-  }
-
-  private pinNumericValidator(control: AbstractControl): ValidationErrors | null {
-    const v = control.value;
-    if (v == null || v === '') return null;
-    return /^\d{4}$/.test(String(v).trim()) ? null : { pinFormat: true };
   }
 
   get email() {
     return this.loginForm.get('email');
   }
-  get pin() {
-    return this.loginForm.get('pin');
-  }
-
-  onPinInput(e: Event): void {
-    const input = e.target as HTMLInputElement;
-    const digits = input.value.replace(/\D/g, '').slice(0, 4);
-    this.loginForm.patchValue({ pin: digits }, { emitEvent: true });
+  get password() {
+    return this.loginForm.get('password');
   }
 
   onSubmit(): void {
     this.loginForm.markAllAsTouched();
+    this.errorMessage = '';
     if (this.loginForm.invalid) return;
-    this.router.navigate(['/dashboard']);
+
+    this.loading = true;
+    const { email, password } = this.loginForm.value;
+
+    this.auth.login(email, password).subscribe((result) => {
+      this.loading = false;
+      if (result.success) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.errorMessage = result.error || 'Login failed. Please try again.';
+      }
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { Component, input, output, signal, inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { NavItemConfig } from '../../models/nav-item.model';
 import { NavItemComponent } from '../nav-item/nav-item.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface SidebarUser {
   name: string;
@@ -90,7 +90,7 @@ export interface SidebarUser {
   styles: [],
 })
 export class SidebarComponent {
-  private router = inject(Router);
+  private auth = inject(AuthService);
   collapsed = input<boolean>(false);
   user = input<SidebarUser | null>(null);
   navItems = input<NavItemConfig[]>([]);
@@ -100,7 +100,7 @@ export class SidebarComponent {
   darkMode = signal(false);
 
   onLogout(): void {
-    this.router.navigate(['/login']);
+    this.auth.logout();
   }
 
   getAvatarUrl(user: SidebarUser): string {

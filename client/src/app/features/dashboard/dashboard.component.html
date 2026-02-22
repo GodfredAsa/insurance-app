@@ -1,8 +1,13 @@
 <div class="ifrs17-report wrap">
+  @if (loading()) {
+    <div class="ifrs-loading"><i class="fas fa-spinner fa-spin"></i> Loading IFRS 17 data...</div>
+  } @else if (error()) {
+    <div class="ifrs-error">{{ error() }}</div>
+  } @else {
   <!-- Report header (index.html style) -->
   <header class="ifrs-header">
     <h1>IFRS 17 — Sample Data Analysis</h1>
-    <p>Reporting date: {{ reportingDate }} | Currency: {{ currency }} | Portfolios: {{ portfolios.join(', ') }}</p>
+    <p>Reporting date: {{ reportingDate() }} | Currency: {{ currency() }} | Portfolios: {{ portfolios().join(', ') }}</p>
   </header>
 
   @if (currentSection() === 'summary') {
@@ -14,41 +19,41 @@
     <div class="dashboard-cards">
       <div class="card">
         <div class="label">Insurance liability</div>
-        <div class="value">{{ fmtNum(totalLiabilityClose) }} <small>{{ currency }}</small></div>
-        @if (liabilityTrendPct != null) {
-          <div class="trend" [ngClass]="liabilityTrendPct >= 0 ? 'up' : 'down'">{{ trendText(liabilityTrendPct) }}</div>
+        <div class="value">{{ fmtNum(totalLiabilityClose()) }} <small>{{ currency() }}</small></div>
+        @if (liabilityTrendPct() != null) {
+          <div class="trend" [ngClass]="liabilityTrendPct()! >= 0 ? 'up' : 'down'">{{ trendText(liabilityTrendPct()) }}</div>
         }
       </div>
       <div class="card">
         <div class="label">Reinsurance asset</div>
-        <div class="value">{{ fmtNum(totalReinAsset) }} <small>{{ currency }}</small></div>
+        <div class="value">{{ fmtNum(totalReinAsset()) }} <small>{{ currency() }}</small></div>
       </div>
       <div class="card">
         <div class="label">Closing CSM</div>
-        <div class="value">{{ fmtNum(totalCSMClose) }} <small>{{ currency }}</small></div>
-        @if (csmTrendPct != null) {
-          <div class="trend" [ngClass]="csmTrendPct >= 0 ? 'up' : 'down'">{{ trendText(csmTrendPct) }}</div>
+        <div class="value">{{ fmtNum(totalCSMClose()) }} <small>{{ currency() }}</small></div>
+        @if (csmTrendPct() != null) {
+          <div class="trend" [ngClass]="csmTrendPct()! >= 0 ? 'up' : 'down'">{{ trendText(csmTrendPct()) }}</div>
         }
       </div>
       <div class="card">
         <div class="label">Gross premium</div>
-        <div class="value">{{ fmtNum(totalGross) }} <small>{{ currency }}</small></div>
+        <div class="value">{{ fmtNum(totalGross()) }} <small>{{ currency() }}</small></div>
       </div>
       <div class="card">
         <div class="label">Net premium</div>
-        <div class="value">{{ fmtNum(totalNet) }} <small>{{ currency }}</small></div>
+        <div class="value">{{ fmtNum(totalNet()) }} <small>{{ currency() }}</small></div>
       </div>
       <div class="card">
         <div class="label">Claims incurred</div>
-        <div class="value">{{ fmtNum(totalIncurred) }} <small>{{ currency }}</small></div>
+        <div class="value">{{ fmtNum(totalIncurred()) }} <small>{{ currency() }}</small></div>
       </div>
       <div class="card">
         <div class="label">Loss ratio</div>
-        <div class="value">{{ lossRatioPct }} <small>%</small></div>
+        <div class="value">{{ lossRatioPct() }} <small>%</small></div>
       </div>
       <div class="card">
         <div class="label">Contracts</div>
-        <div class="value">{{ contractsCount }}</div>
+        <div class="value">{{ contractsCount() }}</div>
       </div>
     </div>
 
@@ -56,32 +61,32 @@
     <div class="chart-row">
       <div class="chart-box">
         <h4 class="chart-box-title">Gross premium by portfolio</h4>
-        <app-donut-chart [data]="donutPremiumData" [chartHeight]="220" />
+        <app-donut-chart [data]="donutPremiumData()" [chartHeight]="220" />
       </div>
       <div class="chart-box">
         <h4 class="chart-box-title">Closing liability by portfolio</h4>
-        <app-donut-chart [data]="donutLiabilityData" [chartHeight]="220" />
+        <app-donut-chart [data]="donutLiabilityData()" [chartHeight]="220" />
       </div>
     </div>
     <div class="chart-row">
       <div class="chart-box">
         <h4 class="chart-box-title">Premium vs claims by portfolio</h4>
-        <app-bar-chart [series]="barPremiumClaimsSeries" [xLabels]="portfolios" height="260px" />
+        <app-bar-chart [series]="barPremiumClaimsSeries()" [xLabels]="portfolios()" height="260px" />
       </div>
       <div class="chart-box">
         <h4 class="chart-box-title">Opening vs closing liability</h4>
-        <app-bar-chart [series]="barOpeningClosingSeries" [xLabels]="portfolios" height="260px" />
+        <app-bar-chart [series]="barOpeningClosingSeries()" [xLabels]="portfolios()" height="260px" />
       </div>
     </div>
     <h3 class="ifrs-h3">Trend analysis</h3>
     <div class="chart-row">
       <div class="chart-box">
         <h4 class="chart-box-title">Liability trend by cohort year</h4>
-        <app-line-chart [series]="lineLiabilitySeries" [xLabels]="cohortLabels" height="260px" />
+        <app-line-chart [series]="lineLiabilitySeries()" [xLabels]="cohortLabels()" height="260px" />
       </div>
       <div class="chart-box">
         <h4 class="chart-box-title">CSM trend by cohort year</h4>
-        <app-line-chart [series]="lineCsmSeries" [xLabels]="cohortLabels" height="260px" />
+        <app-line-chart [series]="lineCsmSeries()" [xLabels]="cohortLabels()" height="260px" />
       </div>
     </div>
     <h3 class="ifrs-h3">Portfolio comparison</h3>
@@ -93,7 +98,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (row of portfolioComparison; track row.portfolio) {
+          @for (row of portfolioComparison(); track row.portfolio) {
             <tr>
               <td>{{ row.portfolio }}</td>
               <td class="num">{{ row.contracts }}</td>
@@ -123,7 +128,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (r of lm; track r.portfolio + r.cohort_year) {
+          @for (r of lm(); track r.portfolio + r.cohort_year) {
             <tr>
               <td>{{ r.portfolio }}</td><td>{{ r.cohort_year }}</td>
               <td class="num">{{ fmtNum(r.opening_balance) }}</td><td class="num">{{ fmtNum(r.new_contracts) }}</td>
@@ -134,13 +139,13 @@
           }
           <tr class="total">
             <td>Total</td><td></td>
-            <td class="num">{{ fmtNum(totalLiabilityOpen) }}</td>
-            <td class="num">{{ fmtNum(liabilityTotals.new_contracts) }}</td>
-            <td class="num">{{ fmtNum(liabilityTotals.premiums_received) }}</td>
-            <td class="num">{{ fmtNum(liabilityTotals.claims_incurred) }}</td>
-            <td class="num">{{ fmtNum(liabilityTotals.csm_release) }}</td>
-            <td class="num">{{ fmtNum(liabilityTotals.experience_variance) }}</td>
-            <td class="num">{{ fmtNum(totalLiabilityClose) }}</td>
+            <td class="num">{{ fmtNum(totalLiabilityOpen()) }}</td>
+            <td class="num">{{ fmtNum(liabilityTotals().new_contracts) }}</td>
+            <td class="num">{{ fmtNum(liabilityTotals().premiums_received) }}</td>
+            <td class="num">{{ fmtNum(liabilityTotals().claims_incurred) }}</td>
+            <td class="num">{{ fmtNum(liabilityTotals().csm_release) }}</td>
+            <td class="num">{{ fmtNum(liabilityTotals().experience_variance) }}</td>
+            <td class="num">{{ fmtNum(totalLiabilityClose()) }}</td>
           </tr>
         </tbody>
       </table>
@@ -152,7 +157,7 @@
   <section id="csm" class="ifrs-section">
     <h2 class="ifrs-section-title">2. Contractual service margin (CSM) reconciliation</h2>
     <p class="ifrs-desc">CSM from opening to closing: initial recognition, changes in estimates, release to P&amp;L.</p>
-    <div class="summary-box">Total insurance revenue from CSM release in period: <strong>{{ fmtNum(totalCSMRelease) }} {{ currency }}</strong></div>
+    <div class="summary-box">Total insurance revenue from CSM release in period: <strong>{{ fmtNum(totalCSMRelease()) }} {{ currency() }}</strong></div>
     <div class="ifrs-table-wrap">
       <table class="ifrs-table">
         <thead>
@@ -161,7 +166,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (r of cm; track r.portfolio + r.cohort_year) {
+          @for (r of cm(); track r.portfolio + r.cohort_year) {
             <tr>
               <td>{{ r.portfolio }}</td><td>{{ r.cohort_year }}</td>
               <td class="num">{{ fmtNum(r.opening_csm) }}</td><td class="num">{{ fmtNum(r.initial_recognition) }}</td>
@@ -171,11 +176,11 @@
           }
           <tr class="total">
             <td>Total</td><td></td>
-            <td class="num">{{ fmtNum(csmTotals.opening_csm) }}</td>
-            <td class="num">{{ fmtNum(csmTotals.initial_recognition) }}</td>
-            <td class="num">{{ fmtNum(csmTotals.changes_in_estimates) }}</td>
-            <td class="num">{{ fmtNum(totalCSMRelease) }}</td>
-            <td class="num">{{ fmtNum(totalCSMClose) }}</td>
+            <td class="num">{{ fmtNum(csmTotals().opening_csm) }}</td>
+            <td class="num">{{ fmtNum(csmTotals().initial_recognition) }}</td>
+            <td class="num">{{ fmtNum(csmTotals().changes_in_estimates) }}</td>
+            <td class="num">{{ fmtNum(totalCSMRelease()) }}</td>
+            <td class="num">{{ fmtNum(totalCSMClose()) }}</td>
           </tr>
         </tbody>
       </table>
@@ -188,14 +193,14 @@
   <section id="revenue-expense" class="ifrs-section">
     <h2 class="ifrs-section-title">3. Insurance revenue and insurance service expense</h2>
     <p class="ifrs-desc">Amounts recognised in P&amp;L: revenue (CSM release) and expenses (claims, acquisition).</p>
-    <div class="summary-box"><strong>Insurance revenue (CSM release):</strong> {{ fmtNum(totalCSMRelease) }} {{ currency }}</div>
-    <div class="summary-box"><strong>Insurance service expense — Claims incurred:</strong> {{ fmtNum(totalIncurred) }} {{ currency }}</div>
-    <div class="summary-box"><strong>Insurance service expense — Acquisition costs (total):</strong> {{ fmtNum(totalAcq) }} {{ currency }}</div>
+    <div class="summary-box"><strong>Insurance revenue (CSM release):</strong> {{ fmtNum(totalCSMRelease()) }} {{ currency() }}</div>
+    <div class="summary-box"><strong>Insurance service expense — Claims incurred:</strong> {{ fmtNum(totalIncurred()) }} {{ currency() }}</div>
+    <div class="summary-box"><strong>Insurance service expense — Acquisition costs (total):</strong> {{ fmtNum(totalAcq()) }} {{ currency() }}</div>
     <div class="ifrs-table-wrap">
       <table class="ifrs-table">
         <thead><tr><th>Contract</th><th>Commission</th><th>Underwriting</th><th>Total</th></tr></thead>
         <tbody>
-          @for (r of ac; track r.contract_id) {
+          @for (r of ac(); track r.contract_id) {
             <tr>
               <td>{{ r.contract_id }}</td>
               <td class="num">{{ fmtNum(r.commission) }}</td>
@@ -219,7 +224,7 @@
       <table class="ifrs-table">
         <thead><tr><th>Contract</th><th>Period</th><th>Gross</th><th>Ceded</th><th>Net</th><th>Received date</th></tr></thead>
         <tbody>
-          @for (r of prem; track r.contract_id + r.period) {
+          @for (r of prem(); track r.contract_id + r.period) {
             <tr>
               <td>{{ r.contract_id }}</td><td>{{ r.period }}</td>
               <td class="num">{{ fmtNum(r.gross_premium) }}</td><td class="num">{{ fmtNum(r.ceded_premium) }}</td>
@@ -234,7 +239,7 @@
       <table class="ifrs-table">
         <thead><tr><th>Cohort</th><th>Dev. Y1</th><th>Dev. Y2</th><th>Dev. Y3</th><th>Incremental total</th></tr></thead>
         <tbody>
-          @for (r of dev; track r.cohort_year) {
+          @for (r of dev(); track r.cohort_year) {
             <tr>
               <td>{{ r.cohort_year }}</td>
               <td class="num">{{ fmtNum(r.development_year_1) }}</td>
@@ -258,7 +263,7 @@
       <table class="ifrs-table">
         <thead><tr><th>Portfolio</th><th>Cohort</th><th>Experience variance (liability)</th><th>Changes in estimates (CSM)</th></tr></thead>
         <tbody>
-          @for (lr of lm; track lr.portfolio + lr.cohort_year) {
+          @for (lr of lm(); track lr.portfolio + lr.cohort_year) {
             <tr>
               <td>{{ lr.portfolio }}</td><td>{{ lr.cohort_year }}</td>
               <td class="num">{{ fmtNum(lr.experience_variance) }}</td>
@@ -277,15 +282,15 @@
     <h2 class="ifrs-section-title">6. Reinsurance and net exposure</h2>
     <p class="ifrs-desc">Ceded premium, recoveries, reinsurance asset by contract.</p>
     <div class="summary-box">
-      Total ceded premium (YTD): <strong>{{ fmtNum(totalCededYtd) }} {{ currency }}</strong> |
-      Recoveries YTD: <strong>{{ fmtNum(totalRecoveries) }} {{ currency }}</strong> |
-      Reinsurance asset: <strong>{{ fmtNum(totalReinAsset) }} {{ currency }}</strong>
+      Total ceded premium (YTD): <strong>{{ fmtNum(totalCededYtd()) }} {{ currency() }}</strong> |
+      Recoveries YTD: <strong>{{ fmtNum(totalRecoveries()) }} {{ currency() }}</strong> |
+      Reinsurance asset: <strong>{{ fmtNum(totalReinAsset()) }} {{ currency() }}</strong>
     </div>
     <div class="ifrs-table-wrap">
       <table class="ifrs-table">
         <thead><tr><th>Contract</th><th>Reinsurer</th><th>Ceded premium YTD</th><th>Recoveries YTD</th><th>Reinsurance asset</th></tr></thead>
         <tbody>
-          @for (r of rein; track r.contract_id) {
+          @for (r of rein(); track r.contract_id) {
             <tr>
               <td>{{ r.contract_id }}</td><td>{{ r.reinsurer }}</td>
               <td class="num">{{ fmtNum(r.ceded_premium_ytd) }}</td><td class="num">{{ fmtNum(r.recoveries_ytd) }}</td>
@@ -308,8 +313,8 @@
       <table class="ifrs-table">
         <thead><tr><th>Portfolio</th><th>Count</th></tr></thead>
         <tbody>
-          @for (p of portfolios; track p) {
-            <tr><td>{{ p }}</td><td class="num">{{ byPortfolio[p].count }}</td></tr>
+          @for (p of portfolios(); track p) {
+            <tr><td>{{ p }}</td><td class="num">{{ byPortfolio()[p].count }}</td></tr>
           }
         </tbody>
       </table>
@@ -319,10 +324,10 @@
       <table class="ifrs-table">
         <thead><tr><th>Portfolio</th><th>Gross premium</th><th>Ceded</th><th>Net</th></tr></thead>
         <tbody>
-          @for (p of portfolios; track p) {
+          @for (p of portfolios(); track p) {
             <tr>
               <td>{{ p }}</td>
-              <td class="num">{{ fmtNum(byPortfolio[p].premium) }}</td>
+              <td class="num">{{ fmtNum(byPortfolio()[p].premium) }}</td>
               <td class="num">—</td>
               <td class="num">—</td>
             </tr>
@@ -342,7 +347,7 @@
       <table class="ifrs-table">
         <thead><tr><th>Term (years)</th><th>Rate %</th><th>As at date</th></tr></thead>
         <tbody>
-          @for (r of disc; track r.term_years) {
+          @for (r of disc(); track r.term_years) {
             <tr>
               <td>{{ r.term_years }}</td>
               <td class="num">{{ fmtPct(r.rate_pct) }}</td>
@@ -364,7 +369,7 @@
       <table class="ifrs-table">
         <thead><tr><th>Portfolio</th><th>Assumption type</th><th>Value %</th><th>Effective date</th><th>Description</th></tr></thead>
         <tbody>
-          @for (r of assump; track r.portfolio + r.assumption_type) {
+          @for (r of assump(); track r.portfolio + r.assumption_type) {
             <tr>
               <td>{{ r.portfolio }}</td><td>{{ r.assumption_type }}</td>
               <td class="num">{{ fmtPct(r.value_pct) }}</td><td>{{ r.effective_date }}</td>
@@ -382,16 +387,16 @@
   <section id="balances" class="ifrs-section">
     <h2 class="ifrs-section-title">10. Statement of financial position extracts</h2>
     <p class="ifrs-desc">Insurance contract liabilities and reinsurance contract assets at reporting date.</p>
-    <div class="summary-box"><strong>Insurance contract liabilities (total closing):</strong> {{ fmtNum(totalLiabilityClose) }} {{ currency }}</div>
-    <div class="summary-box"><strong>Reinsurance contract assets (total):</strong> {{ fmtNum(totalReinAsset) }} {{ currency }}</div>
+    <div class="summary-box"><strong>Insurance contract liabilities (total closing):</strong> {{ fmtNum(totalLiabilityClose()) }} {{ currency() }}</div>
+    <div class="summary-box"><strong>Reinsurance contract assets (total):</strong> {{ fmtNum(totalReinAsset()) }} {{ currency() }}</div>
     <div class="ifrs-table-wrap">
       <table class="ifrs-table">
         <thead><tr><th>Portfolio</th><th>Cohort</th><th>Closing liability</th></tr></thead>
         <tbody>
-          @for (r of lm; track r.portfolio + r.cohort_year) {
+          @for (r of lm(); track r.portfolio + r.cohort_year) {
             <tr><td>{{ r.portfolio }}</td><td>{{ r.cohort_year }}</td><td class="num">{{ fmtNum(r.closing_balance) }}</td></tr>
           }
-          <tr class="total"><td>Total</td><td></td><td class="num">{{ fmtNum(totalLiabilityClose) }}</td></tr>
+          <tr class="total"><td>Total</td><td></td><td class="num">{{ fmtNum(totalLiabilityClose()) }}</td></tr>
         </tbody>
       </table>
     </div>
@@ -407,7 +412,7 @@
       <table class="ifrs-table">
         <thead><tr><th>Contract</th><th>Portfolio</th><th>Product</th><th>Cohort</th><th>Model</th><th>Inception</th><th>Coverage end</th></tr></thead>
         <tbody>
-          @for (r of contracts; track r.contract_id) {
+          @for (r of contracts(); track r.contract_id) {
             <tr>
               <td>{{ r.contract_id }}</td><td>{{ r.portfolio }}</td><td>{{ r.product }}</td>
               <td>{{ r.cohort_year }}</td><td>{{ r.measurement_model }}</td>
@@ -426,15 +431,15 @@
     <h2 class="ifrs-section-title">12. Claims reserve and payment pattern</h2>
     <p class="ifrs-desc">Outstanding reserves and paid vs incurred by claim.</p>
     <div class="summary-box">
-      <strong>Total incurred:</strong> {{ fmtNum(totalIncurred) }} {{ currency }} |
-      <strong>Total paid:</strong> {{ fmtNum(totalPaid) }} {{ currency }} |
-      <strong>Outstanding reserve:</strong> {{ fmtNum(totalOutstanding) }} {{ currency }}
+      <strong>Total incurred:</strong> {{ fmtNum(totalIncurred()) }} {{ currency() }} |
+      <strong>Total paid:</strong> {{ fmtNum(totalPaid()) }} {{ currency() }} |
+      <strong>Outstanding reserve:</strong> {{ fmtNum(totalOutstanding()) }} {{ currency() }}
     </div>
     <div class="ifrs-table-wrap">
       <table class="ifrs-table">
         <thead><tr><th>Contract</th><th>Claim</th><th>Incurred date</th><th>Incurred amount</th><th>Paid amount</th><th>Outstanding reserve</th></tr></thead>
         <tbody>
-          @for (r of cl; track r.claim_id) {
+          @for (r of cl(); track r.claim_id) {
             <tr>
               <td>{{ r.contract_id }}</td><td>{{ r.claim_id }}</td><td>{{ r.incurred_date || '—' }}</td>
               <td class="num">{{ fmtNum(r.incurred_amount) }}</td><td class="num">{{ fmtNum(r.paid_amount) }}</td>
@@ -445,5 +450,6 @@
       </table>
     </div>
   </section>
+  }
   }
 </div>

@@ -1,10 +1,11 @@
-import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { SidebarComponent, SidebarUser } from './shared/components/sidebar/sidebar.component';
 import { NavItemConfig } from './shared/models/nav-item.model';
 import { NavigationEnd } from '@angular/router';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +28,7 @@ import { NavigationEnd } from '@angular/router';
       >
         <header class="sticky top-0 z-10 bg-gray-100 border-b border-gray-200 px-6 py-4">
           <div class="flex items-center gap-6">
-            <p class="text-lg font-medium text-gray-900 whitespace-nowrap">Hello, Mike!</p>
+            <p class="text-lg font-medium text-gray-900 whitespace-nowrap">Hello, {{ sidebarUserDisplay() }}!</p>
             <div class="flex-1 flex justify-center max-w-xl mx-auto">
               <div class="relative w-full">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -61,14 +62,20 @@ import { NavigationEnd } from '@angular/router';
 })
 export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
+  private auth = inject(AuthService);
   private sub?: Subscription;
   showAppLayout = signal(true);
   sidebarCollapsed = signal(false);
-  sidebarUser: () => SidebarUser | null = () => ({
-    name: 'Mike',
-    email: 'mike@example.com',
-    avatarUrl: 'https://ui-avatars.com/api/?name=Mike&background=dcfce7&color=16a34a',
+  sidebarUser = computed<SidebarUser | null>(() => {
+    const u = this.auth.currentUser();
+    if (!u) return null;
+    return {
+      name: u.name,
+      email: u.email,
+      avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=dcfce7&color=16a34a`,
+    };
   });
+  sidebarUserDisplay = computed(() => this.auth.currentUser()?.name ?? 'Guest');
   navItems = signal<NavItemConfig[]>([
     { icon: 'fa-chart-pie', label: 'Summary & charts', link: '/dashboard' },
     { icon: 'fa-balance-scale', label: 'Liability reconciliation', link: '/dashboard/liability' },

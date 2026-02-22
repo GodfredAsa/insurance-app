@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-signup',
@@ -13,10 +14,13 @@ import { Router, RouterLink } from '@angular/router';
 export class SignupComponent {
   signupForm: FormGroup;
   passwordVisible = false;
+  loading = false;
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private auth: AuthService
   ) {
     this.signupForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -37,7 +41,17 @@ export class SignupComponent {
 
   onSubmit(): void {
     this.signupForm.markAllAsTouched();
+    this.errorMessage = '';
     if (this.signupForm.invalid) return;
-    this.router.navigate(['/dashboard']);
+
+    this.loading = true;
+    this.auth.register(this.signupForm.value).subscribe((result) => {
+      this.loading = false;
+      if (result.success) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.errorMessage = result.error || 'Registration failed. Please try again.';
+      }
+    });
   }
 }
