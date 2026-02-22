@@ -17,9 +17,8 @@ import { NavItemConfig } from '../../models/nav-item.model';
           [class.justify-center]="collapsed()"
           [class.px-3]="!collapsed()"
           [class.px-2]="collapsed()"
-          [class.bg-green-50]="item().active && activeClass() === 'green'"
+          [class.nav-active-navy]="item().active && activeClass() === 'green'"
           [class.bg-blue-50]="item().active && activeClass() !== 'green'"
-          [class.text-green-600]="item().active && activeClass() === 'green'"
           [class.text-blue-600]="item().active && activeClass() !== 'green'"
           [class.font-medium]="item().active"
         >
@@ -39,7 +38,7 @@ import { NavItemConfig } from '../../models/nav-item.model';
               <li>
                 <a
                   [routerLink]="child.link ?? '#'"
-                  [routerLinkActive]="activeClass() === 'green' ? 'text-green-600' : 'text-blue-600'"
+                  [routerLinkActive]="activeClass() === 'green' ? 'nav-active-navy-text' : 'text-blue-600'"
                   class="block py-1.5 text-sm text-gray-500 hover:text-gray-700"
                 >{{ child.label }}</a>
               </li>
@@ -51,7 +50,7 @@ import { NavItemConfig } from '../../models/nav-item.model';
       <li>
         <a
           [routerLink]="item().link ?? '#'"
-          [routerLinkActive]="activeClass() === 'green' ? 'bg-green-50 text-green-600 font-medium border-l-4 border-l-green-600' : 'bg-blue-50 text-blue-600 font-medium border-l-4 border-l-blue-600'"
+          [routerLinkActive]="activeClass() === 'green' ? 'nav-active-navy font-medium border-l-4' : 'bg-blue-50 text-blue-600 font-medium border-l-4 border-l-blue-600'"
           [routerLinkActiveOptions]="{ exact: item().link === '/' || item().link === '/dashboard' }"
           class="flex items-center py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 border-l-4 border-transparent"
           [class.gap-3]="!collapsed()"
@@ -67,7 +66,16 @@ import { NavItemConfig } from '../../models/nav-item.model';
       </li>
     }
   `,
-  styles: [],
+  styles: [`
+    .nav-active-navy {
+      background-color: rgba(26, 54, 93, 0.1);
+      color: #1a365d;
+      border-left-color: #1a365d;
+    }
+    .nav-active-navy-text {
+      color: #1a365d;
+    }
+  `],
 })
 export class NavItemComponent {
   item = input.required<NavItemConfig>();

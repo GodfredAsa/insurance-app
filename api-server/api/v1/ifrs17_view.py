@@ -16,7 +16,7 @@ def get_metadata():
         raise HTTPException(status_code=503, detail=str(e)) from e
 
 
-@router.get("/dashboard/summary")
+@router.get("/summary")
 def get_dashboard_summary():
     """Dashboard summary: totals, trend %, by_portfolio, portfolios list."""
     try:
@@ -25,7 +25,7 @@ def get_dashboard_summary():
         raise HTTPException(status_code=503, detail=str(e)) from e
 
 
-@router.get("/dashboard/liability-trend")
+@router.get("/liability-trend")
 def get_dashboard_liability_trend():
     """Liability by cohort year (labels and values for line chart)."""
     try:
@@ -34,7 +34,7 @@ def get_dashboard_liability_trend():
         raise HTTPException(status_code=503, detail=str(e)) from e
 
 
-@router.get("/dashboard/csm-trend")
+@router.get("/csm-trend")
 def get_dashboard_csm_trend():
     """CSM by cohort year (labels and values for line chart)."""
     try:
@@ -43,7 +43,7 @@ def get_dashboard_csm_trend():
         raise HTTPException(status_code=503, detail=str(e)) from e
 
 
-@router.get("/dashboard/portfolio-comparison")
+@router.get("/portfolio-comparison")
 def get_dashboard_portfolio_comparison():
     """Portfolio comparison table: portfolio, contracts, premium, claims, loss %, liability, CSM."""
     try:
@@ -52,7 +52,7 @@ def get_dashboard_portfolio_comparison():
         raise HTTPException(status_code=503, detail=str(e)) from e
 
 
-@router.get("/dashboard")
+@router.get("/")
 def get_dashboard():
     """Single call: summary + liability trend + csm trend + portfolio comparison."""
     try:

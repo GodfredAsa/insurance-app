@@ -1,4 +1,5 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { NavItemConfig } from '../../models/nav-item.model';
 import { NavItemComponent } from '../nav-item/nav-item.component';
 
@@ -68,21 +69,28 @@ export interface SidebarUser {
           </ul>
         }
       </nav>
-      @if (!collapsed()) {
-        <div class="p-4 flex-shrink-0">
-          <div class="rounded-xl bg-green-600 p-4 text-white">
-            <p class="text-sm leading-snug">Earns 50 \$ when you refer! Refer a friends and get a bonus now!</p>
-            <button type="button" class="mt-3 w-full rounded-lg bg-white/20 py-2 text-sm font-medium hover:bg-white/30">
-              Show more
-            </button>
-          </div>
-        </div>
-      }
+      <div class="p-4 flex-shrink-0 border-t border-gray-100" [class.px-2]="collapsed()">
+        <button
+          type="button"
+          (click)="onLogout()"
+          class="flex items-center w-full rounded-lg py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90"
+          [class.justify-center]="collapsed()"
+          [class.gap-2]="!collapsed()"
+          style="background-color: #1a365d;"
+          title="Log out"
+        >
+          <i class="fas fa-sign-out-alt w-5 text-center flex-shrink-0"></i>
+          @if (!collapsed()) {
+            <span>Log out</span>
+          }
+        </button>
+      </div>
     </aside>
   `,
   styles: [],
 })
 export class SidebarComponent {
+  private router = inject(Router);
   collapsed = input<boolean>(false);
   user = input<SidebarUser | null>(null);
   navItems = input<NavItemConfig[]>([]);
@@ -90,6 +98,10 @@ export class SidebarComponent {
   footerText = input<string | null>(null);
   toggle = output<void>();
   darkMode = signal(false);
+
+  onLogout(): void {
+    this.router.navigate(['/login']);
+  }
 
   getAvatarUrl(user: SidebarUser): string {
     if (user.avatarUrl) return user.avatarUrl;

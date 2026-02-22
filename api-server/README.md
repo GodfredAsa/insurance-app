@@ -19,7 +19,7 @@ This README helps you **understand and navigate the codebase** and **contribute*
 - [Request flow](#request-flow)
 - [Key concepts](#key-concepts)
 - [API reference](#api-reference)
-- [IFRS 17 API](#ifrs-17-api)
+- [IFRS 17 API Usage Guide](#ifrs-17-api-usage-guide)
 - [Database](#database)
 - [Authentication](#authentication)
 - [Configuration](#configuration)
@@ -193,29 +193,179 @@ Default admin (created on startup): **admin@admin.com** / **1234**.
 
 ---
 
-## IFRS 17 API
+## IFRS 17 API Usage Guide
 
 IFRS 17 endpoints are **public** (no JWT required). They serve dashboard summaries, liability/CSM reconciliations, and raw data for the IFRS 17 report (see project root `IFRS17_SYSTEM_BUILD_PLAN.md` and `index.html`).
 
 **Data source:** The server reads from **`ifrs17_sample_data.json`** in the **project root** (the directory that contains `api-server/`). The path is resolved from `api-server/services/ifrs17_data.py` as `../ifrs17_sample_data.json`. If the file is missing, all IFRS 17 routes return **503** with a detail message.
 
-| Method | URL | Description |
-|--------|-----|-------------|
-| GET | `/api/v1/ifrs17/metadata` | Reporting date, currency, portfolios |
-| GET | `/api/v1/ifrs17/dashboard/summary` | Totals, trend %, by_portfolio (for cards and charts) |
-| GET | `/api/v1/ifrs17/dashboard` | Combined: summary + liability trend + CSM trend + portfolio comparison |
-| GET | `/api/v1/ifrs17/dashboard/liability-trend` | Labels and values for liability-by-cohort line chart |
-| GET | `/api/v1/ifrs17/dashboard/csm-trend` | Labels and values for CSM-by-cohort line chart |
-| GET | `/api/v1/ifrs17/dashboard/portfolio-comparison` | Table: portfolio, contracts, premium, claims, loss %, liability, CSM |
-| GET | `/api/v1/ifrs17/reconciliations/liability` | Liability reconciliation rows + totals |
-| GET | `/api/v1/ifrs17/reconciliations/csm` | CSM reconciliation rows + totals + insurance revenue from CSM release |
-| GET | `/api/v1/ifrs17/data` | Raw data. Optional: `?portfolio=Motor` or `?cohort_year=2024` |
+**Base URL:** `http://127.0.0.1:8000` (prefix: `/api/v1/ifrs17`)
 
-**Quick test (no token):**
+### Endpoint summary
+
+| Method | Endpoint | Request body | Query params | Description |
+|--------|----------|--------------|--------------|-------------|
+| GET | `/api/v1/ifrs17/metadata` | none | none | Reporting date, currency, portfolios |
+| GET | `/api/v1/ifrs17/summary` | none | none | Totals, trend %, by_portfolio (for cards and charts) |
+| GET | `/api/v1/ifrs17/` | none | none | Combined: summary + liability trend + CSM trend + portfolio comparison |
+| GET | `/api/v1/ifrs17/liability-trend` | none | none | Labels and values for liability-by-cohort line chart |
+| GET | `/api/v1/ifrs17/csm-trend` | none | none | Labels and values for CSM-by-cohort line chart |
+| GET | `/api/v1/ifrs17/portfolio-comparison` | none | none | Table: portfolio, contracts, premium, claims, loss %, liability, CSM |
+| GET | `/api/v1/ifrs17/reconciliations/liability` | none | none | Liability reconciliation rows + totals |
+| GET | `/api/v1/ifrs17/reconciliations/csm` | none | none | CSM reconciliation rows + totals + insurance revenue from CSM release |
+| GET | `/api/v1/ifrs17/data` | none | `portfolio`, `cohort_year` (both optional) | Raw data, optionally filtered |
+
+All IFRS 17 endpoints are **GET**; no request body is required. The `/data` endpoint accepts optional query parameters: `?portfolio=Motor` or `?cohort_year=2024`.
+
+### Example success responses (for testing)
+
+**GET /api/v1/ifrs17/metadata**
+
+```json
+{
+  "reporting_date": "2024-12-31",
+  "currency": "USD",
+  "portfolios": ["Motor", "Property", "Life"],
+  "description": "IFRS 17 sample reporting data aligned to..."
+}
+```
+
+**GET /api/v1/ifrs17/summary**
+
+```json
+{
+  "insurance_liability": 8675,
+  "insurance_liability_opening": 9400,
+  "liability_trend_pct": -7.7,
+  "reinsurance_asset": 940,
+  "closing_csm": 4540,
+  "csm_trend_pct": 2.3,
+  "gross_premium": 8200,
+  "net_premium": 7010,
+  "claims_incurred": 18900,
+  "loss_ratio_pct": 269.6,
+  "contracts_count": 7,
+  "insurance_revenue_csm_release": -650,
+  "acquisition_costs_total": 1369,
+  "claims_paid": 13400,
+  "claims_outstanding_reserve": 4000,
+  "by_portfolio": { "Motor": {...}, "Property": {...}, "Life": {...} },
+  "portfolios": ["Motor", "Property", "Life"]
+}
+```
+
+**GET /api/v1/ifrs17/**
+
+```json
+{
+  "summary": { ... },
+  "liability_trend": { "labels": ["2022","2023","2024"], "values": [4030, 3915, 8675] },
+  "csm_trend": { "labels": ["2022","2023","2024"], "values": [2290, 1890, 360] },
+  "portfolio_comparison": [ { "portfolio": "Motor", "contracts": 3, ... }, ... ]
+}
+```
+
+**GET /api/v1/ifrs17/liability-trend** / **GET /api/v1/ifrs17/csm-trend**
+
+```json
+{
+  "labels": ["2022", "2023", "2024"],
+  "values": [4030, 3915, 8675]
+}
+```
+
+**GET /api/v1/ifrs17/portfolio-comparison**
+
+```json
+[
+  {
+    "portfolio": "Motor",
+    "contracts": 3,
+    "gross_premium": 3150,
+    "claims": 5700,
+    "loss_ratio_pct": 181.0,
+    "closing_liability": 525,
+    "closing_csm": 160
+  },
+  { "portfolio": "Property", ... },
+  { "portfolio": "Life", ... }
+]
+```
+
+**GET /api/v1/ifrs17/reconciliations/liability**
+
+```json
+{
+  "rows": [
+    {
+      "portfolio": "Motor",
+      "cohort_year": 2023,
+      "opening_balance": 420,
+      "new_contracts": 0,
+      "premiums_received": -380,
+      "claims_incurred": 200,
+      "csm_release": -180,
+      "experience_variance": 15,
+      "closing_balance": 275
+    }
+  ],
+  "totals": {
+    "opening_balance": 9400,
+    "new_contracts": 2040,
+    "premiums_received": -2330,
+    "claims_incurred": 1000,
+    "csm_release": -650,
+    "experience_variance": 15,
+    "closing_balance": 8675
+  }
+}
+```
+
+**GET /api/v1/ifrs17/reconciliations/csm**
+
+```json
+{
+  "rows": [
+    {
+      "portfolio": "Motor",
+      "cohort_year": 2023,
+      "opening_csm": 180,
+      "initial_recognition": 0,
+      "changes_in_estimates": -5,
+      "csm_release_to_pl": -180,
+      "closing_csm": 0
+    }
+  ],
+  "totals": {
+    "opening_csm": 5290,
+    "initial_recognition": 700,
+    "changes_in_estimates": 5,
+    "csm_release_to_pl": -650,
+    "closing_csm": 4540
+  },
+  "insurance_revenue_from_csm_release": -650
+}
+```
+
+**GET /api/v1/ifrs17/data**
+
+Returns the full `ifrs17_sample_data.json` structure (metadata, contracts, premiums, claims, acquisition_costs, assumptions, discount_rates, reinsurance, liability_movements, csm_movements, claims_development), optionally filtered by `portfolio` and/or `cohort_year`.
+
+### curl examples for testing
 
 ```bash
 curl -s http://127.0.0.1:8000/api/v1/ifrs17/metadata
-curl -s http://127.0.0.1:8000/api/v1/ifrs17/dashboard/summary
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/summary
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/liability-trend
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/csm-trend
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/portfolio-comparison
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/reconciliations/liability
+curl -s http://127.0.0.1:8000/api/v1/ifrs17/reconciliations/csm
+curl -s "http://127.0.0.1:8000/api/v1/ifrs17/data"
+curl -s "http://127.0.0.1:8000/api/v1/ifrs17/data?portfolio=Motor"
+curl -s "http://127.0.0.1:8000/api/v1/ifrs17/data?cohort_year=2024"
+curl -s "http://127.0.0.1:8000/api/v1/ifrs17/data?portfolio=Property&cohort_year=2023"
 ```
 
 ---

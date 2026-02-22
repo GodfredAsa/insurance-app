@@ -112,7 +112,7 @@ export class Ifrs17Service {
   }
 
   getDashboard(): Observable<Ifrs17Dashboard | null> {
-    return this.http.get<Ifrs17Dashboard>(`${BASE}/dashboard`).pipe(
+    return this.http.get<Ifrs17Dashboard>(`${BASE}/`).pipe(
       catchError(() => of(null))
     );
   }
